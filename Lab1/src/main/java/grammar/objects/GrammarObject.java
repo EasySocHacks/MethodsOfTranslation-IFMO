@@ -1,4 +1,5 @@
 package grammar.objects;
 
-public class GrammarObject {
+public interface GrammarObject {
+    String getName();
 }
