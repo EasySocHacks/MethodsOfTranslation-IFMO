@@ -1,0 +1,38 @@
+{
+  "terminals": [
+    "xor",
+    or
+    and
+    not
+    (
+    )
+  ],
+}
+
+terminals:
+  - xor
+  - or
+  - and
+  - not
+  - (
+  - )
+non-terminats:
+  - S
+  - XOR
+  - OR
+  - AND
+  - NOT
+  - BRACKETS
+start-non-terminal: S
+rules:
+  - S -> XOR
+  - XOR -> OR xor XOR
+  - XOR -> OR
+  - OR -> AND or OR
+  - OR -> AND
+  - AND -> NOT and AND
+  - AND -> NOT
+  - NOT -> not BRACKETS
+  - NOT -> BRACKETS
+  - BRACKETS -> ( S )
+  - BRACKETS -> var
