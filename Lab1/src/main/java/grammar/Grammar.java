@@ -14,8 +14,8 @@ import java.util.List;
 
 public class Grammar {
     private final String RULE_USAGE_STRING = "Usage: [Non-terminal] -> [Terminal|Non-terminal] <[Terminal|Non-terminal][ ]>*";
-    private final String[] terminalDeniedSubstrings = {"'"};
-    private final String[] nonTerminalDeniedSubstrings = {"'"};
+    private final String[] terminalDeniedSubstrings = {"'", "$"};
+    private final String[] nonTerminalDeniedSubstrings = {"'", "$"};
 
     @JsonProperty("terminals")
     private List<Terminal> terminals;
@@ -28,7 +28,7 @@ public class Grammar {
 
     @JsonProperty("rules")
     private List<String> ruleStringList;
-    private List<Rule> ruleList = new ArrayList<>();
+    private final List<Rule> ruleList = new ArrayList<>();
 
     public Grammar() {}
 
@@ -59,7 +59,7 @@ public class Grammar {
     private boolean deleteRightBranching() {
         for (int i = 0; i < ruleList.size(); i++) {
             Rule ruleI = ruleList.get(i);
-            NonTerminal possibleNewNonTerminal = new NonTerminal(ruleI.getFromNonTerminal().getName() + "'");
+            NonTerminal possibleNewNonTerminal = new NonTerminal(ruleI.getFromNonTerminal().getName() + "'r");
 
             boolean foundRightBranching = false;
             for (int j = i + 1; j < ruleList.size(); j++) {
@@ -102,7 +102,7 @@ public class Grammar {
         for (int i = 0; i < ruleList.size(); i++) {
             if (ruleList.get(i).getFromNonTerminal().equals(ruleList.get(i).getToGrammarObjectsList().get(0))) {
                 NonTerminal recursiveNonTerminal = ruleList.get(i).getFromNonTerminal();
-                NonTerminal newNonTerminal = new NonTerminal("'" + recursiveNonTerminal.getName());
+                NonTerminal newNonTerminal = new NonTerminal(recursiveNonTerminal.getName() + "'l");
 
                 boolean foundDirectlyLeftRecursion = false;
 
@@ -126,9 +126,7 @@ public class Grammar {
                         if (ruleJ.getToGrammarObjectsList().get(0).equals(recursiveNonTerminal)) {
                             ruleList.set(j, new Rule(
                                     newNonTerminal,
-                                    (ruleJ.getToGrammarObjectsList().size() == 1
-                                            ? Collections.singletonList(Terminal.EPSILON)
-                                            : ruleJ.getToGrammarObjectsList().subList(1, ruleJ.getToGrammarObjectsList().size()))
+                                    ruleJ.getToGrammarObjectsList().subList(1, ruleJ.getToGrammarObjectsList().size())
                             ));
                             ruleList.get(j).getToGrammarObjectsList().add(newNonTerminal);
                         } else {
@@ -152,7 +150,11 @@ public class Grammar {
     private void checkTerminals() throws GrammarRuleParseException {
         for (Terminal terminal : terminals) {
             if (terminal.equals(Terminal.EPSILON)) {
-                throw new GrammarRuleParseException("Terminal 'eps' is already reserved");
+                throw new GrammarRuleParseException(String.format("Terminal '%s' is already reserved",  Terminal.EPSILON.getName()));
+            }
+
+            if (terminal.equals(Terminal.EOS)) {
+                throw new GrammarRuleParseException(String.format("Terminal '%s' is already reserved", Terminal.EOS.getName()));
             }
 
             for (String terminalDeniedSubstring : terminalDeniedSubstrings) {
@@ -223,6 +225,18 @@ public class Grammar {
         }
 
         return new Rule(fromNonTerminal, toGrammarObjectsList);
+    }
+
+    public List<Terminal> getTerminals() {
+        return terminals;
+    }
+
+    public List<NonTerminal> getNonTerminals() {
+        return nonTerminals;
+    }
+
+    public NonTerminal getStartNonTerminal() {
+        return startNonTerminal;
     }
 
     public List<Rule> getRuleList() {

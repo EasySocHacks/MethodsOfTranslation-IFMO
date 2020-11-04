@@ -3,9 +3,9 @@ terminals:
   - or
   - and
   - not
-  - (
-  - )
-  - var
+  - {name: (, option: WHITESPACELESS}
+  - {name: ), option: WHITESPACELESS}
+  - {name: var, option: VARIABLE}
 non-terminals:
   - S
   - XOR
