@@ -29,4 +29,12 @@ public class Rule {
 
         return stringBuilder.toString();
     }
+
+    public NonTerminal getFromNonTerminal() {
+        return fromNonTerminal;
+    }
+
+    public List<GrammarObject> getToGrammarObjectsList() {
+        return toGrammarObjectsList;
+    }
 }
