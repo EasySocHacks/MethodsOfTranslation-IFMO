@@ -1,10 +1,17 @@
+import exceptions.lexic.tokenizer.TokenizerParseException;
+import exceptions.syntax.ExpressionParserException;
 import syntax.ExpressionParser;
 import visualizer.GraphVisualizer;
 
 public class Main {
     public static void main(String[] args) {
         ExpressionParser expressionParser = new ExpressionParser();
-        ExpressionParser.Node node = expressionParser.parse("(a and b) or not (c xor (a or not b))");
+        ExpressionParser.Node node = null;
+        try {
+            node = expressionParser.parse("(a and b)");
+        } catch (TokenizerParseException | ExpressionParserException e) {
+            e.printStackTrace();
+        }
 
         System.out.println(node);
 

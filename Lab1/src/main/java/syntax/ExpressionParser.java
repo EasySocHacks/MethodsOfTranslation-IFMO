@@ -79,22 +79,16 @@ public class ExpressionParser {
         this.syntaxAnalyzer = new SyntaxAnalyzer(grammar);
     }
 
-    public Node parse(String expression) {
+    public Node parse(String expression) throws TokenizerParseException, ExpressionParserException {
         lexicalAnalyzer = new LexicalAnalyzer(expression, grammar.getTerminals());
 
-        try {
-            lexicalAnalyzer.nextToken();
+        lexicalAnalyzer.nextToken();
 
-            if (lexicalAnalyzer.getToken() == Terminal.EOS) {
-                throw new ExpressionParserException("Cannot parse an empty string");
-            }
-
-            return parseNonTerminal(grammar.getStartNonTerminal());
-        } catch (TokenizerParseException | ExpressionParserException e) {
-            e.printStackTrace();
+        if (lexicalAnalyzer.getToken() == Terminal.EOS) {
+            throw new ExpressionParserException("Cannot parse an empty string");
         }
 
-        return null;
+        return parseNonTerminal(grammar.getStartNonTerminal());
     }
 
     @SuppressWarnings("rawtypes")

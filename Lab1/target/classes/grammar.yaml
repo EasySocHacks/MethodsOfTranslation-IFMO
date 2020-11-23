@@ -22,7 +22,7 @@ rules:
   - OR -> AND
   - AND -> NOT and AND
   - AND -> NOT
-  - NOT -> not BRACKETS
+  - NOT -> not NOT
   - NOT -> BRACKETS
   - BRACKETS -> ( S )
   - BRACKETS -> var
