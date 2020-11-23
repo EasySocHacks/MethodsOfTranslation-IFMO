@@ -5,6 +5,7 @@ import grammar.objects.GrammarObject;
 
 import java.util.Objects;
 
+@SuppressWarnings("rawtypes")
 public class Terminal<T> implements GrammarObject {
     public static final Terminal EPSILON = new Terminal("eps");
     public static final Terminal EOS = new Terminal("$");

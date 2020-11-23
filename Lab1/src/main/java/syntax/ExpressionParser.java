@@ -36,6 +36,7 @@ public class ExpressionParser {
             return children;
         }
 
+        @SuppressWarnings("rawtypes")
         @Override
         public String toString() {
             if (grammarObject instanceof Terminal) {

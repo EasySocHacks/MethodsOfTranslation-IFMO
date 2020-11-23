@@ -1,7 +1,5 @@
 package visualizer;
 
-import grammar.objects.terminals.Terminal;
-import guru.nidi.graphviz.attribute.Color;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.MutableGraph;

@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+@SuppressWarnings("rawtypes")
 public class Grammar {
     private final String RULE_USAGE_STRING = "Usage: [Non-terminal] -> [Terminal|Non-terminal] <[Terminal|Non-terminal][ ]>*";
     private final String[] terminalDeniedSubstrings = {"'", "$"};
@@ -132,10 +133,9 @@ public class Grammar {
                                     newNonTerminal,
                                     ruleJ.getToGrammarObjectsList().subList(1, ruleJ.getToGrammarObjectsList().size())
                             ));
-                            ruleList.get(j).getToGrammarObjectsList().add(newNonTerminal);
-                        } else {
-                            ruleList.get(j).getToGrammarObjectsList().add(newNonTerminal);
                         }
+
+                        ruleList.get(j).getToGrammarObjectsList().add(newNonTerminal);
                     }
                 }
 

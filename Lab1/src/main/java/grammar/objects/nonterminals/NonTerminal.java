@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class NonTerminal implements GrammarObject {
     @JsonProperty
-    private String name;
+    private final String name;
 
     public NonTerminal(String name) {
         this.name = name;

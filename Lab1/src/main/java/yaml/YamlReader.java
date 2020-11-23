@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.nio.file.Paths;
 
 public class YamlReader {
-    private File yamlFile;
-    private ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
+    private final File yamlFile;
+    private final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
     public YamlReader(File yamlFile) {
         this.yamlFile = yamlFile;

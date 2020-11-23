@@ -8,8 +8,8 @@ import java.util.List;
 
 public class Rule {
     @JsonProperty
-    private NonTerminal fromNonTerminal;
-    private List<GrammarObject> toGrammarObjectsList;
+    private final NonTerminal fromNonTerminal;
+    private final List<GrammarObject> toGrammarObjectsList;
 
     public Rule(NonTerminal fromNonTerminal, List<GrammarObject> toGrammarObjectsList) {
         this.fromNonTerminal = fromNonTerminal;
