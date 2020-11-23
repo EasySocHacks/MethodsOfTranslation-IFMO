@@ -11,14 +11,22 @@ public class LexicalAnalyzer {
     private final String parsingString;
     private int parsingStringPosition = 0;
 
+    private Terminal token = null;
+
     public LexicalAnalyzer(String parsingString, List<Terminal> terminalList) {
         this.parsingString = parsingString;
         this.terminalList = terminalList;
     }
 
-    public Terminal nextToken() throws TokenizerParseException {
+    public Terminal getToken() {
+        return token;
+    }
+
+    public void nextToken() throws TokenizerParseException {
         if (parsingStringPosition >= parsingString.length()) {
-            return null;
+            token = Terminal.EOS;
+
+            return;
         }
 
         char currentChar = parsingString.charAt(parsingStringPosition);
@@ -27,7 +35,9 @@ public class LexicalAnalyzer {
             parsingStringPosition++;
 
             if (parsingStringPosition >= parsingString.length()) {
-                return null;
+                token = Terminal.EOS;
+
+                return;
             }
 
             currentChar = parsingString.charAt(parsingStringPosition);
@@ -39,7 +49,9 @@ public class LexicalAnalyzer {
 
         if (isEndOfToken()) {
             parsingStringPosition++;
-            return new Terminal(stringBuilder.toString(), Terminal.TerminalOption.WHITESPACELESS);
+            token = new Terminal(stringBuilder.toString(), Terminal.TerminalOption.WHITESPACELESS);
+
+            return;
         }
 
         while (true) {
@@ -68,11 +80,15 @@ public class LexicalAnalyzer {
         }
 
         if (matchingToken != null) {
-            return matchingToken;
+            token = matchingToken;
+
+            return;
         }
 
         if (regexMatchingToken != null) {
-            return new Terminal(regexMatchingToken.getName(), regexMatchingToken.getTerminalOption(), stringBuilder.toString());
+            token = new Terminal(regexMatchingToken.getName(), regexMatchingToken.getTerminalOption(), stringBuilder.toString());
+
+            return;
         }
 
         throw new TokenizerParseException(String.format("Cannot resolve token '%s' at position %d",

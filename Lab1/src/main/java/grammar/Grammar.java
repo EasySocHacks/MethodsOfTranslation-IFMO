@@ -79,6 +79,8 @@ public class Grammar {
             }
 
             if (foundRightBranching) {
+                nonTerminals.add(possibleNewNonTerminal);
+
                 ruleList.set(i, new Rule(
                         possibleNewNonTerminal,
                         (ruleI.getToGrammarObjectsList().size() == 1
@@ -118,6 +120,8 @@ public class Grammar {
                 if (!foundDirectlyLeftRecursion) {
                     continue;
                 }
+
+                nonTerminals.add(newNonTerminal);
 
                 for (int j = 0; j < ruleList.size(); j++) {
                     Rule ruleJ = ruleList.get(j);

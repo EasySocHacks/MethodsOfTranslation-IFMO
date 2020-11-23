@@ -1,26 +1,14 @@
-import grammar.Grammar;
-import grammar.GrammarParser;
-import lexic.LexicalAnalyzer;
-import yaml.YamlReader;
+import syntax.ExpressionParser;
+import visualizer.GraphVisualizer;
 
 public class Main {
     public static void main(String[] args) {
-        GrammarParser grammarParser = new GrammarParser();
-        Grammar grammar = grammarParser.getGrammar();
+        ExpressionParser expressionParser = new ExpressionParser();
+        ExpressionParser.Node node = expressionParser.parse("(a and b) or not (c xor (a or not b))");
 
-        LexicalAnalyzer lexicalAnalyzer = new LexicalAnalyzer("   and(xor a or)or   and xor   ", grammar.getTerminals());
-        try {
-            System.out.println(lexicalAnalyzer.nextToken());
-            System.out.println(lexicalAnalyzer.nextToken());
-            System.out.println(lexicalAnalyzer.nextToken());
-            System.out.println(lexicalAnalyzer.nextToken());
-            System.out.println(lexicalAnalyzer.nextToken());
-            System.out.println(lexicalAnalyzer.nextToken());
-            System.out.println(lexicalAnalyzer.nextToken());
-            System.out.println(lexicalAnalyzer.nextToken());
-            System.out.println(lexicalAnalyzer.nextToken());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        System.out.println(node);
+
+        GraphVisualizer graphVisualizer = new GraphVisualizer(node);
+        graphVisualizer.visualize();
     }
 }

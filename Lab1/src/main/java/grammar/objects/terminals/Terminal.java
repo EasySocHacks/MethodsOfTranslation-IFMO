@@ -10,7 +10,7 @@ public class Terminal<T> implements GrammarObject {
     public static final Terminal EOS = new Terminal("$");
 
     public enum TerminalOption {
-        WHITESPACELESS, //TODO: Check length == 1
+        WHITESPACELESS,
         VARIABLE(true, "[a-z]"),
         INTEGER(true, "[0-9]+");
 
