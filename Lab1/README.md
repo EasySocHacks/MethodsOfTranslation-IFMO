@@ -1,1 +1,1 @@
-# BroadcastsMethods-IFMO
+# MethodsOfTranslation-IFMO
