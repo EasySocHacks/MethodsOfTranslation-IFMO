@@ -15,11 +15,11 @@ non-terminals:
   - BRACKETS
 start-non-terminal: S
 rules:
-  - S -> XOR
-  - XOR -> OR xor XOR
-  - XOR -> OR
-  - OR -> AND or OR
-  - OR -> AND
+  - S -> OR
+  - XOR -> XOR xor OR
+  - XOR -> AND
+  - OR -> OR or OR
+  - OR -> XOR
   - AND -> NOT and AND
   - AND -> NOT
   - NOT -> not NOT

@@ -8,7 +8,7 @@ public class Main {
         ExpressionParser expressionParser = new ExpressionParser();
         ExpressionParser.Node node = null;
         try {
-            node = expressionParser.parse("((A or B) xor (C and Z)) or D");
+            node = expressionParser.parse("a and b or (c xor D)");
         } catch (TokenizerParseException | ExpressionParserException e) {
             e.printStackTrace();
         }
