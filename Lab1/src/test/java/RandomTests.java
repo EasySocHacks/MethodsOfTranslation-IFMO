@@ -13,12 +13,12 @@ public class RandomTests extends BaseTests {
     private int minDepth;
     private final Random random = new Random();
 
-    private enum UnaryOperators {
+    private enum UnaryOperations {
         NOT("not");
 
         private String name;
 
-        UnaryOperators(String name) {
+        UnaryOperations(String name) {
             this.name = name;
         }
 
@@ -27,14 +27,14 @@ public class RandomTests extends BaseTests {
         }
     }
 
-    private enum BinaryOperators {
+    private enum BinaryOperations {
         XOR("xor"),
         OR("or"),
         AND("and");
 
         private String name;
 
-        BinaryOperators(String name) {
+        BinaryOperations(String name) {
             this.name = name;
         }
 
@@ -62,11 +62,11 @@ public class RandomTests extends BaseTests {
 
         switch (Math.abs(random.nextInt()) % availableOptionsCount) {
             case 0: {
-                int operatorNumber = generateNumberUpTo(UnaryOperators.values().length);
+                int operatorNumber = generateNumberUpTo(UnaryOperations.values().length);
 
                 StringBuilder stringBuilder = new StringBuilder();
 
-                stringBuilder.append(UnaryOperators.values()[operatorNumber].getName());
+                stringBuilder.append(UnaryOperations.values()[operatorNumber].getName());
                 stringBuilder.append(" ( ");
                 stringBuilder.append(generateExpression(depth + 1));
                 stringBuilder.append(") ");
@@ -75,14 +75,14 @@ public class RandomTests extends BaseTests {
             }
 
             case 1: {
-                int operatorNumber = generateNumberUpTo(BinaryOperators.values().length);
+                int operatorNumber = generateNumberUpTo(BinaryOperations.values().length);
 
                 StringBuilder stringBuilder = new StringBuilder();
 
                 stringBuilder.append("( ");
                 stringBuilder.append(generateExpression(depth + 1));
                 stringBuilder.append(" ) ");
-                stringBuilder.append(BinaryOperators.values()[operatorNumber].getName());
+                stringBuilder.append(BinaryOperations.values()[operatorNumber].getName());
                 stringBuilder.append(" ( ");
                 stringBuilder.append(generateExpression(depth + 1));
                 stringBuilder.append(" )");
