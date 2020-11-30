@@ -8,10 +8,10 @@ public class Main {
                 "c = a + b * (b - 3);\n" +
                 "a = 3;\n" +
                 "c = a + b * (b - 3);";
-        ExpressionListGrammarLexer testGrammarLexer = new ExpressionListGrammarLexer(CharStreams.fromString(expression));
+        ExpressionListGrammarLexer grammarLexer = new ExpressionListGrammarLexer(CharStreams.fromString(expression));
 
-        CommonTokenStream commonTokenStream = new CommonTokenStream(testGrammarLexer);
-        ExpressionListGrammarParser testGrammarParser = new ExpressionListGrammarParser(commonTokenStream);
-        System.out.println(testGrammarParser.parse().answer);
+        CommonTokenStream commonTokenStream = new CommonTokenStream(grammarLexer);
+        ExpressionListGrammarParser grammarParser = new ExpressionListGrammarParser(commonTokenStream);
+        System.out.println(grammarParser.parse().answer);
     }
 }

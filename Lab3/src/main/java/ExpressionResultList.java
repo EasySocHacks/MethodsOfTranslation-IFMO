@@ -1,3 +1,5 @@
+import exception.ParserVariableNotFoundException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +21,12 @@ public class ExpressionResultList {
             }
         }
 
-        //TODO: Throw exception
+        try {
+            throw new ParserVariableNotFoundException(String.format("There is no variable names '%s' yet", name));
+        } catch (ParserVariableNotFoundException e) {
+            e.printStackTrace();
+        }
+
         return 0;
     }
 
