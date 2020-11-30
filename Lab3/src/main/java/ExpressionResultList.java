@@ -22,7 +22,7 @@ public class ExpressionResultList {
         }
 
         try {
-            throw new ParserVariableNotFoundException(String.format("There is no variable names '%s' yet", name));
+            throw new ParserVariableNotFoundException(String.format("There is no variable named '%s' yet", name));
         } catch (ParserVariableNotFoundException e) {
             e.printStackTrace();
         }
