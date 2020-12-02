@@ -37,12 +37,33 @@ plusAndMinus [ExpressionResultList list] returns [int value]
     ;
 
 multiplyAndDivide [ExpressionResultList list] returns [int value]
-    :   firstExpression=bracketsOrNumberOrVariable[$list] { $value = $firstExpression.value; }
+    :   firstExpression=pow[$list] { $value = $firstExpression.value; }
         (
-            maybeWhitespaces '*' maybeWhitespaces secondExpression=bracketsOrNumberOrVariable[$list] { $value *= $secondExpression.value; }
+            maybeWhitespaces '*' maybeWhitespaces secondExpression=pow[$list] { $value *= $secondExpression.value; }
             |
-            maybeWhitespaces '/' maybeWhitespaces secondExpression=bracketsOrNumberOrVariable[$list] { $value /= $secondExpression.value; }
+            maybeWhitespaces '/' maybeWhitespaces secondExpression=pow[$list] { $value /= $secondExpression.value; }
         )*
+    ;
+
+pow [ExpressionResultList list] returns [int value]
+    :   (
+            base=unaryMinus[$list] { $value = $base.value; }
+            maybeWhitespaces
+            '**'
+            maybeWhitespaces
+            (
+                power=pow[$list] { $value = (int) Math.pow($value, $power.value); }
+                |
+                brackets=unaryMinus[$list] { $value = (int) Math.pow($value, $brackets.value); }
+            )
+        )
+        |
+        expr=unaryMinus[$list] { $value = $expr.value; }
+    ;
+
+unaryMinus [ExpressionResultList list] returns [int value]
+    :   '-' expr=bracketsOrNumberOrVariable[$list] { $value = -$expr.value; }
+    |   expr=bracketsOrNumberOrVariable[$list] { $value = $expr.value; }
     ;
 
 bracketsOrNumberOrVariable [ExpressionResultList list] returns [int value]

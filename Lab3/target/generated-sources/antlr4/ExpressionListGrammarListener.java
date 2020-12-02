@@ -67,6 +67,26 @@ public interface ExpressionListGrammarListener extends ParseTreeListener {
 	 */
 	void exitMultiplyAndDivide(ExpressionListGrammarParser.MultiplyAndDivideContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link ExpressionListGrammarParser#pow}.
+	 * @param ctx the parse tree
+	 */
+	void enterPow(ExpressionListGrammarParser.PowContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ExpressionListGrammarParser#pow}.
+	 * @param ctx the parse tree
+	 */
+	void exitPow(ExpressionListGrammarParser.PowContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link ExpressionListGrammarParser#unaryMinus}.
+	 * @param ctx the parse tree
+	 */
+	void enterUnaryMinus(ExpressionListGrammarParser.UnaryMinusContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link ExpressionListGrammarParser#unaryMinus}.
+	 * @param ctx the parse tree
+	 */
+	void exitUnaryMinus(ExpressionListGrammarParser.UnaryMinusContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link ExpressionListGrammarParser#bracketsOrNumberOrVariable}.
 	 * @param ctx the parse tree
 	 */

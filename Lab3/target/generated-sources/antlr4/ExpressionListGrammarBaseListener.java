@@ -87,6 +87,30 @@ public class ExpressionListGrammarBaseListener implements ExpressionListGrammarL
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterPow(ExpressionListGrammarParser.PowContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPow(ExpressionListGrammarParser.PowContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterUnaryMinus(ExpressionListGrammarParser.UnaryMinusContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitUnaryMinus(ExpressionListGrammarParser.UnaryMinusContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterBracketsOrNumberOrVariable(ExpressionListGrammarParser.BracketsOrNumberOrVariableContext ctx) { }
 	/**
 	 * {@inheritDoc}
