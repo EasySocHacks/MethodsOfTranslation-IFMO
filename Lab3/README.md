@@ -25,5 +25,5 @@ Output:
 ---
 **Modification:**
 
-*Make operation right-associative operation ```**``` equals to power operation, such as
+Make right-associative operation ```**``` equals to power operation, such as
 ```2**3**2 === 2**(3**2)```
