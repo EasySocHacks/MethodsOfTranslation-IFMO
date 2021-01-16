@@ -1,7 +1,15 @@
 // Generated from AntlrGrammarParser.g4 by ANTLR 4.7.1
 
-  import grammar.objects.terminals.Terminal;
-  import grammar.objects.nonterminals.NonTerminal;
+    import grammar.Grammar;
+    import grammar.objects.terminals.Terminal;
+    import grammar.objects.terminals.Terminal.TerminalOption;
+    import grammar.objects.nonterminals.NonTerminal;
+    import grammar.rules.Rule;
+    import grammar.objects.GrammarObject;
+    import grammar.objects.nonterminals.translators.Translator;
+    import grammar.objects.nonterminals.translators.TranslatorEnum;
+    import grammar.objects.attributes.Attribute;
+    import grammar.objects.attributes.Attribute.AttributeType;
 
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -41,6 +49,16 @@ public interface AntlrGrammarParserListener extends ParseTreeListener {
 	 */
 	void exitTerminal(AntlrGrammarParserParser.TerminalContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link AntlrGrammarParserParser#terminalOption}.
+	 * @param ctx the parse tree
+	 */
+	void enterTerminalOption(AntlrGrammarParserParser.TerminalOptionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link AntlrGrammarParserParser#terminalOption}.
+	 * @param ctx the parse tree
+	 */
+	void exitTerminalOption(AntlrGrammarParserParser.TerminalOptionContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link AntlrGrammarParserParser#nonTerminalList}.
 	 * @param ctx the parse tree
 	 */
@@ -61,6 +79,56 @@ public interface AntlrGrammarParserListener extends ParseTreeListener {
 	 */
 	void exitNonTerminal(AntlrGrammarParserParser.NonTerminalContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link AntlrGrammarParserParser#startNonTerminal}.
+	 * @param ctx the parse tree
+	 */
+	void enterStartNonTerminal(AntlrGrammarParserParser.StartNonTerminalContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link AntlrGrammarParserParser#startNonTerminal}.
+	 * @param ctx the parse tree
+	 */
+	void exitStartNonTerminal(AntlrGrammarParserParser.StartNonTerminalContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link AntlrGrammarParserParser#ruleList}.
+	 * @param ctx the parse tree
+	 */
+	void enterRuleList(AntlrGrammarParserParser.RuleListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link AntlrGrammarParserParser#ruleList}.
+	 * @param ctx the parse tree
+	 */
+	void exitRuleList(AntlrGrammarParserParser.RuleListContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link AntlrGrammarParserParser#ruleAttrs}.
+	 * @param ctx the parse tree
+	 */
+	void enterRuleAttrs(AntlrGrammarParserParser.RuleAttrsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link AntlrGrammarParserParser#ruleAttrs}.
+	 * @param ctx the parse tree
+	 */
+	void exitRuleAttrs(AntlrGrammarParserParser.RuleAttrsContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link AntlrGrammarParserParser#attribute}.
+	 * @param ctx the parse tree
+	 */
+	void enterAttribute(AntlrGrammarParserParser.AttributeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link AntlrGrammarParserParser#attribute}.
+	 * @param ctx the parse tree
+	 */
+	void exitAttribute(AntlrGrammarParserParser.AttributeContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link AntlrGrammarParserParser#translator}.
+	 * @param ctx the parse tree
+	 */
+	void enterTranslator(AntlrGrammarParserParser.TranslatorContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link AntlrGrammarParserParser#translator}.
+	 * @param ctx the parse tree
+	 */
+	void exitTranslator(AntlrGrammarParserParser.TranslatorContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link AntlrGrammarParserParser#lineSeparator}.
 	 * @param ctx the parse tree
 	 */
@@ -70,4 +138,24 @@ public interface AntlrGrammarParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitLineSeparator(AntlrGrammarParserParser.LineSeparatorContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link AntlrGrammarParserParser#atLeastWhitespaces}.
+	 * @param ctx the parse tree
+	 */
+	void enterAtLeastWhitespaces(AntlrGrammarParserParser.AtLeastWhitespacesContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link AntlrGrammarParserParser#atLeastWhitespaces}.
+	 * @param ctx the parse tree
+	 */
+	void exitAtLeastWhitespaces(AntlrGrammarParserParser.AtLeastWhitespacesContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link AntlrGrammarParserParser#maybeWhitespaces}.
+	 * @param ctx the parse tree
+	 */
+	void enterMaybeWhitespaces(AntlrGrammarParserParser.MaybeWhitespacesContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link AntlrGrammarParserParser#maybeWhitespaces}.
+	 * @param ctx the parse tree
+	 */
+	void exitMaybeWhitespaces(AntlrGrammarParserParser.MaybeWhitespacesContext ctx);
 }

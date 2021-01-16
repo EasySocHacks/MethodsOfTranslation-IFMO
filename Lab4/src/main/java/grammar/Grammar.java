@@ -24,24 +24,21 @@ public class Grammar {
 
     private NonTerminal startNonTerminal = new NonTerminal("S");
 
-    private List<String> ruleStringList;
-    private final List<Rule> ruleList = new ArrayList<>();
+    private List<Rule> ruleList = new ArrayList<>();
 
     public Grammar() {}
 
-    public Grammar(List<Terminal> terminals, List<NonTerminal> nonTerminals, NonTerminal startNonTerminal, List<String> ruleStringList)
-            throws GrammarRuleParseException {
+    public Grammar(List<Terminal> terminals, List<NonTerminal> nonTerminals, NonTerminal startNonTerminal, List<Rule> ruleList) {
         this.terminals = terminals;
         this.nonTerminals = nonTerminals;
         this.startNonTerminal = startNonTerminal;
-        this.ruleStringList = ruleStringList;
+        this.ruleList = ruleList;
     }
 
     public void buildGrammar() throws GrammarRuleParseException {
         checkTerminals();
         checkNonTerminals();
         checkStartNonTerminal();
-        parseRules();
         deleteRecursion();
     }
 
@@ -179,52 +176,6 @@ public class Grammar {
         if (!nonTerminals.contains(startNonTerminal)) {
             throw new GrammarRuleParseException(String.format("Unable to resolve start-non-terminal %s'", startNonTerminal.getName()));
         }
-    }
-
-    private void parseRules() throws GrammarRuleParseException {
-        for (String ruleString : ruleStringList) {
-            ruleList.add(parseRule(ruleString));
-        }
-    }
-
-    private Rule parseRule(String ruleString) throws GrammarRuleParseException {
-        List<String> ruleTokens = Arrays.asList(ruleString.split(" "));
-
-        if (ruleTokens.size() < 3) {
-            throw new GrammarRuleParseException("Syntax error while parsing grammar rules" +
-                    System.lineSeparator() + RULE_USAGE_STRING);
-        }
-
-        NonTerminal fromNonTerminal = new NonTerminal(ruleTokens.get(0));
-        if (!nonTerminals.contains(fromNonTerminal)) {
-            throw new GrammarRuleParseException(String.format("Unknown non-terminal '%s'", fromNonTerminal.getName()));
-        }
-
-        if (!ruleTokens.get(1).equals("->")) {
-            throw new GrammarRuleParseException("Syntax error while parsing grammar rules" +
-                    System.lineSeparator() + RULE_USAGE_STRING);
-        }
-
-        List<GrammarObject> toGrammarObjectsList = new ArrayList<>();
-
-        for (int i = 2; i < ruleTokens.size(); i++) {
-            Terminal toTerminal = new Terminal(ruleTokens.get(i));
-            NonTerminal toNonTerminal = new NonTerminal(ruleTokens.get(i));
-
-            if (terminals.contains(toTerminal)) {
-                toGrammarObjectsList.add(toTerminal);
-                continue;
-            }
-
-            if (nonTerminals.contains(toNonTerminal)) {
-                toGrammarObjectsList.add(toNonTerminal);
-                continue;
-            }
-
-            throw new GrammarRuleParseException(String.format("Unable to resolve grammar object '%s'", ruleTokens.get(i)));
-        }
-
-        return new Rule(fromNonTerminal, toGrammarObjectsList);
     }
 
     public List<Terminal> getTerminals() {

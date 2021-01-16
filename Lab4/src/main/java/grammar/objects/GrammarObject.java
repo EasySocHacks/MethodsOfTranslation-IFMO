@@ -2,14 +2,12 @@ package grammar.objects;
 
 import grammar.objects.attributes.Attribute;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 public interface GrammarObject {
-    List<Attribute<?>> attributes = new ArrayList();
-
     String getName();
     boolean equals(Object o);
     int hashCode();
     String toString();
+    Map<String, Attribute<?>> getAttributes();
 }

@@ -1,11 +1,16 @@
 package grammar.objects.terminals;
 
 import grammar.objects.GrammarObject;
+import grammar.objects.attributes.Attribute;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @SuppressWarnings("rawtypes")
 public class Terminal<T> implements GrammarObject {
+    private final HashMap<String, Attribute<?>> attributes = new HashMap<>();
+    
     public static final Terminal EPSILON = new Terminal("eps");
     public static final Terminal EOS = new Terminal("$");
 
@@ -68,6 +73,10 @@ public class Terminal<T> implements GrammarObject {
         return extraValue;
     }
 
+    public void setTerminalOption(TerminalOption terminalOption) {
+        this.terminalOption = terminalOption;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -84,9 +93,22 @@ public class Terminal<T> implements GrammarObject {
     @Override
     public String toString() {
         if (terminalOption != null && terminalOption.containsExtraValue) {
-            return String.format("{%s: %s}", getName(), extraValue);
+            if (!attributes.isEmpty()) {
+                return String.format("[%s {%s} : %s]", getName(), attributes, extraValue);
+            } else {
+                return String.format("[%s : %s]", getName(), extraValue);
+            }
         }
 
-        return getName();
+        if (attributes.isEmpty()) {
+            return getName();
+        } else {
+            return String.format("%s %s", getName(), attributes);
+        }
+    }
+
+    @Override
+    public Map<String, Attribute<?>> getAttributes() {
+        return attributes;
     }
 }

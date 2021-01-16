@@ -1,11 +1,15 @@
 package grammar.objects.nonterminals;
 
 import grammar.objects.GrammarObject;
+import grammar.objects.attributes.Attribute;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class NonTerminal implements GrammarObject {
     private final String name;
+    private final HashMap<String, Attribute<?>> attributes = new HashMap<>();
 
     public NonTerminal(String name) {
         this.name = name;
@@ -30,6 +34,15 @@ public class NonTerminal implements GrammarObject {
 
     @Override
     public String toString() {
-        return getName();
+        if (attributes.isEmpty()) {
+            return getName();
+        } else {
+            return String.format("%s %s", getName(), attributes);
+        }
+    }
+
+    @Override
+    public Map<String, Attribute<?>> getAttributes() {
+        return attributes;
     }
 }

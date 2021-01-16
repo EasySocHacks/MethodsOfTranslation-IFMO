@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public class Attribute<T> {
     public enum AttributeType {
-        SYNTHESIZED,
-        INHERITED
+        SYNTHESIZED, //return
+        INHERITED //args
     }
 
     private final String name;
@@ -30,8 +30,8 @@ public class Attribute<T> {
         return value;
     }
 
-    public void setValue(T value) {
-        this.value = value;
+    public void setValue(Object value) {
+        this.value = (T) value;
     }
 
     @Override
@@ -45,5 +45,10 @@ public class Attribute<T> {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s : %s", getName(), getType().name());
     }
 }

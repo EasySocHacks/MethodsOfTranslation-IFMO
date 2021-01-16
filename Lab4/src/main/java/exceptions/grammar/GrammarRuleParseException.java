@@ -5,6 +5,10 @@ public class GrammarRuleParseException extends Exception {
         super(message);
     }
 
+    public GrammarRuleParseException(Exception e) {
+        super(e);
+    }
+
     public GrammarRuleParseException(String message, Exception e) {
         super(message, e);
     }
