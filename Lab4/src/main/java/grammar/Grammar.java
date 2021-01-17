@@ -3,6 +3,7 @@ package grammar;
 import exceptions.grammar.GrammarRuleParseException;
 import grammar.objects.GrammarObject;
 import grammar.objects.nonterminals.NonTerminal;
+import grammar.objects.nonterminals.translators.Translator;
 import grammar.objects.terminals.Terminal;
 import grammar.rules.Rule;
 
@@ -14,7 +15,7 @@ import java.util.List;
 @SuppressWarnings("rawtypes")
 public class Grammar {
     private final String RULE_USAGE_STRING = "Usage: [Non-terminal] -> " +
-            "[Terminal|Non-terminal|{ Translator code }] <[Terminal|Non-terminal|{ Translator code }][ ]>*";
+            "[Terminal|Non-terminal|$Translator_Name({ Translator code; })?]([ ]+[Terminal|Non-terminal|{ Translator code }])*";
     private final String[] terminalDeniedSubstrings = {"'", "$"};
     private final String[] nonTerminalDeniedSubstrings = {"'", "$"};
 
@@ -25,6 +26,8 @@ public class Grammar {
     private NonTerminal startNonTerminal = new NonTerminal("S");
 
     private List<Rule> ruleList = new ArrayList<>();
+
+    private List<Translator> translators;
 
     public Grammar() {}
 
@@ -39,6 +42,7 @@ public class Grammar {
         checkTerminals();
         checkNonTerminals();
         checkStartNonTerminal();
+        findTranslators();
         deleteRecursion();
     }
 
@@ -60,14 +64,14 @@ public class Grammar {
                 Rule ruleJ = ruleList.get(j);
 
                 if (ruleI.getFromNonTerminal().equals(ruleJ.getFromNonTerminal()) &&
-                ruleI.getToGrammarObjectsList().get(0).equals(ruleJ.getToGrammarObjectsList().get(0))) {
+                ruleI.getGrammarObjectsList().get(0).equals(ruleJ.getGrammarObjectsList().get(0))) {
                     foundRightBranching = true;
 
                     ruleList.set(j, new Rule(
                             possibleNewNonTerminal,
-                            (ruleJ.getToGrammarObjectsList().size() == 1
+                            (ruleJ.getGrammarObjectsList().size() == 1
                                     ? Collections.singletonList((GrammarObject) Terminal.EPSILON)
-                                    : ruleJ.getToGrammarObjectsList().subList(1, ruleJ.getToGrammarObjectsList().size()))
+                                    : ruleJ.getGrammarObjectsList().subList(1, ruleJ.getGrammarObjectsList().size()))
                     ));
                 }
             }
@@ -77,14 +81,14 @@ public class Grammar {
 
                 ruleList.set(i, new Rule(
                         possibleNewNonTerminal,
-                        (ruleI.getToGrammarObjectsList().size() == 1
+                        (ruleI.getGrammarObjectsList().size() == 1
                                 ? Collections.singletonList((GrammarObject) Terminal.EPSILON)
-                                : ruleI.getToGrammarObjectsList().subList(1, ruleI.getToGrammarObjectsList().size()))
+                                : ruleI.getGrammarObjectsList().subList(1, ruleI.getGrammarObjectsList().size()))
                 ));
 
                 ruleList.add(new Rule(
                         ruleI.getFromNonTerminal(),
-                        Arrays.asList(ruleI.getToGrammarObjectsList().get(0), possibleNewNonTerminal)
+                        Arrays.asList(ruleI.getGrammarObjectsList().get(0), possibleNewNonTerminal)
                 ));
 
                 return true;
@@ -96,7 +100,7 @@ public class Grammar {
 
     private boolean deleteDirectlyLeftRecursion() {
         for (int i = 0; i < ruleList.size(); i++) {
-            if (ruleList.get(i).getFromNonTerminal().equals(ruleList.get(i).getToGrammarObjectsList().get(0))) {
+            if (ruleList.get(i).getFromNonTerminal().equals(ruleList.get(i).getGrammarObjectsList().get(0))) {
                 NonTerminal recursiveNonTerminal = ruleList.get(i).getFromNonTerminal();
                 NonTerminal newNonTerminal = new NonTerminal(recursiveNonTerminal.getName() + "'l");
 
@@ -104,7 +108,7 @@ public class Grammar {
 
                 for (Rule ruleJ : ruleList) {
                     if (ruleJ.getFromNonTerminal().equals(recursiveNonTerminal) &&
-                            !ruleJ.getToGrammarObjectsList().get(0).equals(recursiveNonTerminal)) {
+                            !ruleJ.getGrammarObjectsList().get(0).equals(recursiveNonTerminal)) {
                         foundDirectlyLeftRecursion = true;
 
                         break;
@@ -121,14 +125,14 @@ public class Grammar {
                     Rule ruleJ = ruleList.get(j);
 
                     if (ruleJ.getFromNonTerminal().equals(recursiveNonTerminal)) {
-                        if (ruleJ.getToGrammarObjectsList().get(0).equals(recursiveNonTerminal)) {
+                        if (ruleJ.getGrammarObjectsList().get(0).equals(recursiveNonTerminal)) {
                             ruleList.set(j, new Rule(
                                     newNonTerminal,
-                                    ruleJ.getToGrammarObjectsList().subList(1, ruleJ.getToGrammarObjectsList().size())
+                                    ruleJ.getGrammarObjectsList().subList(1, ruleJ.getGrammarObjectsList().size())
                             ));
                         }
 
-                        ruleList.get(j).getToGrammarObjectsList().add(newNonTerminal);
+                        ruleList.get(j).getGrammarObjectsList().add(newNonTerminal);
                     }
                 }
 
@@ -175,6 +179,26 @@ public class Grammar {
     private void checkStartNonTerminal() throws GrammarRuleParseException {
         if (!nonTerminals.contains(startNonTerminal)) {
             throw new GrammarRuleParseException(String.format("Unable to resolve start-non-terminal %s'", startNonTerminal.getName()));
+        }
+    }
+
+    private void findTranslators() {
+        translators = new ArrayList<>();
+
+        for (Rule rule : ruleList) {
+            for (GrammarObject grammarObject : rule.getGrammarObjectsList()) {
+                if (grammarObject instanceof Translator) {
+                    if (translators.contains(grammarObject)) {
+                        continue;
+                    }
+
+                    translators.add((Translator) grammarObject);
+                }
+            }
+        }
+
+        for (Translator translator : translators) {
+            ruleList.add(new Rule(translator, Collections.singletonList((GrammarObject) Terminal.EPSILON)));
         }
     }
 

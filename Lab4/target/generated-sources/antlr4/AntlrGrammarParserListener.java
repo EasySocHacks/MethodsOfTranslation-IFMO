@@ -7,9 +7,10 @@
     import grammar.rules.Rule;
     import grammar.objects.GrammarObject;
     import grammar.objects.nonterminals.translators.Translator;
-    import grammar.objects.nonterminals.translators.TranslatorEnum;
+    import grammar.objects.nonterminals.translators.Translator.Code;
     import grammar.objects.attributes.Attribute;
     import grammar.objects.attributes.Attribute.AttributeType;
+    import exceptions.grammar.CreateTranslatorWithCurrentCodeException;
 
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -119,15 +120,25 @@ public interface AntlrGrammarParserListener extends ParseTreeListener {
 	 */
 	void exitAttribute(AntlrGrammarParserParser.AttributeContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link AntlrGrammarParserParser#translator}.
+	 * Enter a parse tree produced by {@link AntlrGrammarParserParser#translatorReturn}.
 	 * @param ctx the parse tree
 	 */
-	void enterTranslator(AntlrGrammarParserParser.TranslatorContext ctx);
+	void enterTranslatorReturn(AntlrGrammarParserParser.TranslatorReturnContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link AntlrGrammarParserParser#translator}.
+	 * Exit a parse tree produced by {@link AntlrGrammarParserParser#translatorReturn}.
 	 * @param ctx the parse tree
 	 */
-	void exitTranslator(AntlrGrammarParserParser.TranslatorContext ctx);
+	void exitTranslatorReturn(AntlrGrammarParserParser.TranslatorReturnContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link AntlrGrammarParserParser#translatorArgs}.
+	 * @param ctx the parse tree
+	 */
+	void enterTranslatorArgs(AntlrGrammarParserParser.TranslatorArgsContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link AntlrGrammarParserParser#translatorArgs}.
+	 * @param ctx the parse tree
+	 */
+	void exitTranslatorArgs(AntlrGrammarParserParser.TranslatorArgsContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link AntlrGrammarParserParser#lineSeparator}.
 	 * @param ctx the parse tree

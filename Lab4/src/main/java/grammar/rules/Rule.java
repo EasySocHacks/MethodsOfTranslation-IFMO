@@ -7,11 +7,11 @@ import java.util.List;
 
 public class Rule {
     private final NonTerminal fromNonTerminal;
-    private final List<GrammarObject> toGrammarObjectsList;
+    private final List<GrammarObject> grammarObjectsList;
 
-    public Rule(NonTerminal fromNonTerminal, List<GrammarObject> toGrammarObjectsList) {
+    public Rule(NonTerminal fromNonTerminal, List<GrammarObject> grammarObjectsList) {
         this.fromNonTerminal = fromNonTerminal;
-        this.toGrammarObjectsList = toGrammarObjectsList;
+        this.grammarObjectsList = grammarObjectsList;
     }
 
     @Override
@@ -21,7 +21,7 @@ public class Rule {
         stringBuilder.append(fromNonTerminal.toString()).append(" ");
         stringBuilder.append("->").append(" ");
 
-        for (GrammarObject grammarObject : toGrammarObjectsList) {
+        for (GrammarObject grammarObject : grammarObjectsList) {
             stringBuilder.append(grammarObject).append(" ");
         }
 
@@ -32,7 +32,7 @@ public class Rule {
         return fromNonTerminal;
     }
 
-    public List<GrammarObject> getToGrammarObjectsList() {
-        return toGrammarObjectsList;
+    public List<GrammarObject> getGrammarObjectsList() {
+        return grammarObjectsList;
     }
 }

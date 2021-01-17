@@ -15,7 +15,7 @@ non-terminals:
   - BRACKETS
 start-non-terminal: S
 rules:
-  - S -> XOR
+  - S -> XOR[([1].value, [0].a, [0].b) -> args[0] = (int)args[1] + (int)args[2];]
   - XOR -> OR xor XOR
   - XOR -> OR
   - OR -> AND or OR

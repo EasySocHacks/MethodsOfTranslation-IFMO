@@ -7,9 +7,10 @@
     import grammar.rules.Rule;
     import grammar.objects.GrammarObject;
     import grammar.objects.nonterminals.translators.Translator;
-    import grammar.objects.nonterminals.translators.TranslatorEnum;
+    import grammar.objects.nonterminals.translators.Translator.Code;
     import grammar.objects.attributes.Attribute;
     import grammar.objects.attributes.Attribute.AttributeType;
+    import exceptions.grammar.CreateTranslatorWithCurrentCodeException;
 
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -147,13 +148,25 @@ public class AntlrGrammarParserBaseListener implements AntlrGrammarParserListene
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterTranslator(AntlrGrammarParserParser.TranslatorContext ctx) { }
+	@Override public void enterTranslatorReturn(AntlrGrammarParserParser.TranslatorReturnContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitTranslator(AntlrGrammarParserParser.TranslatorContext ctx) { }
+	@Override public void exitTranslatorReturn(AntlrGrammarParserParser.TranslatorReturnContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTranslatorArgs(AntlrGrammarParserParser.TranslatorArgsContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTranslatorArgs(AntlrGrammarParserParser.TranslatorArgsContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *

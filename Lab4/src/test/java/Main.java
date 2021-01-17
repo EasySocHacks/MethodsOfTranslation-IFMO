@@ -1,8 +1,10 @@
+import exceptions.grammar.GrammarRuleParseException;
 import grammar.Grammar;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class Main {
@@ -27,7 +29,13 @@ public class Main {
 
         CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
         AntlrGrammarParserParser grammarParser = new AntlrGrammarParserParser(commonTokenStream);
-        Grammar grammar = grammarParser.parse().grammar;
+        Grammar grammar = grammarParser.parse("grammar").grammar;
+        try {
+            grammar.buildGrammar();
+        } catch (GrammarRuleParseException e) {
+            e.printStackTrace();
+        }
+
         System.out.println(grammar);
         System.out.println(grammar.getNonTerminals());
         System.out.println(grammar.getTerminals());

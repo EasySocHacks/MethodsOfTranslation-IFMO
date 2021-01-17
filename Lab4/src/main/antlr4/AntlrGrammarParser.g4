@@ -8,19 +8,20 @@ grammar AntlrGrammarParser;
     import grammar.rules.Rule;
     import grammar.objects.GrammarObject;
     import grammar.objects.nonterminals.translators.Translator;
-    import grammar.objects.nonterminals.translators.TranslatorEnum;
+    import grammar.objects.nonterminals.translators.Translator.Code;
     import grammar.objects.attributes.Attribute;
     import grammar.objects.attributes.Attribute.AttributeType;
+    import exceptions.grammar.CreateTranslatorWithCurrentCodeException;
 }
 
-parse returns [Grammar grammar]
+parse [String grammarName] returns [Grammar grammar]
     :   terminalListValue=terminalList
         lineSeparator
         nonTerminalListValue=nonTerminalList
         lineSeparator
         startNonTerminalValue=startNonTerminal
         lineSeparator
-        ruleListValue=ruleList
+        ruleListValue=ruleList[$grammarName]
         { $grammar = new Grammar($terminalListValue.list, $nonTerminalListValue.list, $startNonTerminalValue.start, $ruleListValue.list); }
     ;
 
@@ -81,24 +82,34 @@ startNonTerminal returns [NonTerminal start]
     :   'start-non-terminal:' atLeastWhitespaces name=HighName { $start = new NonTerminal($name.text); }
     ;
 
-ruleList returns [List<Rule> list]
+ruleList [String grammarName] returns [List<Rule> list]
     :   'rules:' { $list = new ArrayList(); }
-        (lineSeparator maybeWhitespaces '-' atLeastWhitespaces ruleAttrsValue=ruleAttrs
+        (lineSeparator maybeWhitespaces '-' atLeastWhitespaces ruleAttrsValue=ruleAttrs[$grammarName]
         { $list.add(new Rule($ruleAttrsValue.fromNonTerminal, $ruleAttrsValue.grammarObjectsList)); })+
     ;
 
-ruleAttrs returns [NonTerminal fromNonTerminal, List<GrammarObject> grammarObjectsList]
+ruleAttrs [String grammarName] returns [NonTerminal fromNonTerminal, List<GrammarObject> grammarObjectsList]
     :   { $grammarObjectsList = new ArrayList(); }
         nonTerminalValue=nonTerminal { $fromNonTerminal = $nonTerminalValue.nonterm; }
         atLeastWhitespaces '->'
         (
             atLeastWhitespaces
             (
-                (terminalValue=terminal { $grammarObjectsList.add($terminalValue.term); })
+                (
+                    terminalValue=terminal
+                    translatorArgsValue=translatorArgs[$grammarName]
+                    { $grammarObjectsList.addAll($translatorArgsValue.translatorList); }
+                    { $grammarObjectsList.add($terminalValue.term); }
+                )
                 |
-                (nonTerminalValue=nonTerminal { $grammarObjectsList.add($nonTerminalValue.nonterm); })
-                |
-                (translatorValue=translator { $grammarObjectsList.add($translatorValue.currentTranslator); })
+                (
+                    nonTerminalValue=nonTerminal
+                    translatorArgsValue=translatorArgs[$grammarName]
+                    { $grammarObjectsList.addAll($translatorArgsValue.translatorList); }
+                    { $grammarObjectsList.add($nonTerminalValue.nonterm); }
+                )
+                (translatorReturnValue=translatorReturn[$grammarName]
+                { $grammarObjectsList.addAll($translatorReturnValue.translatorList); })
             )
         )+
     ;
@@ -112,20 +123,58 @@ attribute returns [Attribute attr]
         )
     ;
 
-translator returns [Translator currentTranslator]
-    :   '$' name=HighName { $currentTranslator = (TranslatorEnum.valueOf($name.text)).getTranslator(); }
+translatorReturn [String grammarName] returns [List<Translator> translatorList]
+    :   { $translatorList = new ArrayList(); }
+        (
+            '{'
+            (
+                maybeWhitespaces
+                argsValue=Args
+                maybeWhitespaces
+                '->'
+                maybeWhitespaces
+                codeValue=Code
+                maybeWhitespaces
+                { $translatorList.add(new Translator($grammarName, new Code($argsValue.text, $codeValue.text))); }
+            )+
+            '}'
+        )?
     ;
+    catch [CreateTranslatorWithCurrentCodeException e] {
+        e.printStackTrace();
+    }
+
+translatorArgs [String grammarName] returns [List<Translator> translatorList]
+    :   { $translatorList = new ArrayList(); }
+        (
+            '['
+            (
+                maybeWhitespaces
+                argsValue=Args
+                maybeWhitespaces
+                '->'
+                maybeWhitespaces
+                codeValue=Code
+                maybeWhitespaces
+                { $translatorList.add(new Translator($grammarName, new Code($argsValue.text, $codeValue.text))); }
+            )+
+            ']'
+        )?
+    ;
+    catch [CreateTranslatorWithCurrentCodeException e] {
+        e.printStackTrace();
+    }
 
 lineSeparator
     : ('\r')? '\n'
     ;
 
 atLeastWhitespaces
-    :   Whitespace+
+    :   (lineSeparator | Whitespace)+
     ;
 
 maybeWhitespaces
-    :   Whitespace*
+    :   (lineSeparator | Whitespace)*
     ;
 
 LowName
@@ -136,14 +185,54 @@ LowName
             |
             ')'
             |
-            ('0'..'1')
+            ('0'..'9')
         )+
-        ;
+    ;
+
+Whitespace
+    :   (' ' | '\t' | '\r' | '\n')
+    ;
 
 HighName
     :   ('A'..'Z')+
     ;
 
-Whitespace
-    :   (' ' | '\t' | '\r' | '\n')
+ClassName
+    :   ('A'..'Z')
+        (
+            ('a'..'z')
+            |
+            ('A'..'Z')
+            |
+            '_'
+            |
+            ('0'..'9')
+        )*
+    ;
+
+Code
+    :   ((LowName | HighName | '='+ | '+'+ | '*'+ | '/'+ | ('0'..'9')+ | ';'+ | '.'+ | '('+ | ')'+ | '<'+ | '>'+ | '%'+ | '['+ | ']'+)
+        Whitespace*)+
+        ';'
+    ;
+
+Args
+    :
+        '('
+        Whitespace*
+        '['
+        ('0'..'9')+
+        '].' LowName
+
+        (
+            Whitespace*
+            ','
+            Whitespace*
+            '['
+            ('0'..'9')+
+            '].' LowName
+        )*
+
+        Whitespace*
+        ')'
     ;
