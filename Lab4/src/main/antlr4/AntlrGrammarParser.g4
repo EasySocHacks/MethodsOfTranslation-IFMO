@@ -9,8 +9,8 @@ grammar AntlrGrammarParser;
     import grammar.objects.GrammarObject;
     import grammar.objects.nonterminals.translators.Translator;
     import grammar.objects.nonterminals.translators.Translator.Code;
+    import grammar.objects.nonterminals.translators.Translator.TranslatorType;
     import grammar.objects.attributes.Attribute;
-    import grammar.objects.attributes.Attribute.AttributeType;
     import exceptions.grammar.CreateTranslatorWithCurrentCodeException;
 }
 
@@ -22,7 +22,7 @@ parse [String grammarName] returns [Grammar grammar]
         startNonTerminalValue=startNonTerminal
         lineSeparator
         ruleListValue=ruleList[$grammarName]
-        { $grammar = new Grammar($terminalListValue.list, $nonTerminalListValue.list, $startNonTerminalValue.start, $ruleListValue.list); }
+        { $grammar = new Grammar($grammarName, $terminalListValue.list, $nonTerminalListValue.list, $startNonTerminalValue.start, $ruleListValue.list); }
     ;
 
 terminalList returns [List<Terminal> list]
@@ -108,6 +108,7 @@ ruleAttrs [String grammarName] returns [NonTerminal fromNonTerminal, List<Gramma
                     { $grammarObjectsList.addAll($translatorArgsValue.translatorList); }
                     { $grammarObjectsList.add($nonTerminalValue.nonterm); }
                 )
+                |
                 (translatorReturnValue=translatorReturn[$grammarName]
                 { $grammarObjectsList.addAll($translatorReturnValue.translatorList); })
             )
@@ -115,12 +116,8 @@ ruleAttrs [String grammarName] returns [NonTerminal fromNonTerminal, List<Gramma
     ;
 
 attribute returns [Attribute attr]
-    :   name=LowName maybeWhitespaces ':' maybeWhitespaces
-        (
-            'SYNTHESIZED' { $attr = new Attribute($name.text, AttributeType.SYNTHESIZED); }
-            |
-            'INHERITED' { $attr = new Attribute($name.text, AttributeType.INHERITED); }
-        )
+    :   name=LowName maybeWhitespaces
+        { $attr = new Attribute($name.text); }
     ;
 
 translatorReturn [String grammarName] returns [List<Translator> translatorList]
@@ -135,7 +132,7 @@ translatorReturn [String grammarName] returns [List<Translator> translatorList]
                 maybeWhitespaces
                 codeValue=Code
                 maybeWhitespaces
-                { $translatorList.add(new Translator($grammarName, new Code($argsValue.text, $codeValue.text))); }
+                { $translatorList.add(new Translator($grammarName, new Code($argsValue.text, $codeValue.text), TranslatorType.RETURN)); }
             )+
             '}'
         )?
@@ -156,7 +153,7 @@ translatorArgs [String grammarName] returns [List<Translator> translatorList]
                 maybeWhitespaces
                 codeValue=Code
                 maybeWhitespaces
-                { $translatorList.add(new Translator($grammarName, new Code($argsValue.text, $codeValue.text))); }
+                { $translatorList.add(new Translator($grammarName, new Code($argsValue.text, $codeValue.text), TranslatorType.ARGS)); }
             )+
             ']'
         )?
@@ -211,7 +208,7 @@ ClassName
     ;
 
 Code
-    :   ((LowName | HighName | '='+ | '+'+ | '*'+ | '/'+ | ('0'..'9')+ | ';'+ | '.'+ | '('+ | ')'+ | '<'+ | '>'+ | '%'+ | '['+ | ']'+)
+    :   ((LowName | HighName | '='+ | '+'+ | '*'+ | '/'+ | ('0'..'9')+ | ';'+ | '.'+ | '('+ | ')'+ | '<'+ | '>'+ | '%'+ | '['+ | ']'+ | '"'+)
         Whitespace*)+
         ';'
     ;
@@ -222,7 +219,7 @@ Args
         Whitespace*
         '['
         ('0'..'9')+
-        '].' LowName
+        ']'
 
         (
             Whitespace*
@@ -230,7 +227,7 @@ Args
             Whitespace*
             '['
             ('0'..'9')+
-            '].' LowName
+            ']'
         )*
 
         Whitespace*

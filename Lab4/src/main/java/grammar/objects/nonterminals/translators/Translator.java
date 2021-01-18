@@ -12,10 +12,49 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Translator extends NonTerminal {
     private final Class<?> codeClass;
-    private String argsString;
+    private List<Argument> args;
+    private TranslatorType translatorType;
+
+    public static class Argument {
+        private int rulePosition;
+
+        public Argument(int rulePosition) {
+            this.rulePosition = rulePosition;
+        }
+
+        public int getRulePosition() {
+            return rulePosition;
+        }
+    }
+
+    public Argument parseArgument(String argString) {
+        argString = argString.strip();
+
+        int rulePosition = Integer.parseInt(argString.substring(1, argString.length() - 1));
+
+        return new Argument(rulePosition);
+    }
+
+    public List<Argument> parseArgumentList(String argsString) {
+        if (argsString.length() <= 2) {
+            return new ArrayList<>();
+        }
+
+        argsString = argsString.substring(1, argsString.length() - 1);
+
+        List<Argument> argumentList = new ArrayList<>();
+
+        for (String curArgs : argsString.split(",")) {
+            argumentList.add(parseArgument(curArgs));
+        }
+
+        return argumentList;
+    }
 
     public static class Code {
         private String argsString;
@@ -35,21 +74,41 @@ public class Translator extends NonTerminal {
         }
     }
 
+    public enum TranslatorType {
+        ARGS,
+        RETURN,
+        COPY_TRANSLATOR,
+        RETURN_TRANSLATOR;
+    }
+
     private final static String classTemplateFormat =
+            "import grammar.objects.nonterminals.NonTerminal;" + System.lineSeparator() +
+            "import grammar.objects.attributes.Attribute;" + System.lineSeparator() +
+            "import java.util.Map;" + System.lineSeparator() +
+            "import java.util.List;" + System.lineSeparator() +
+            System.lineSeparator() +
             "public class %s { " + System.lineSeparator() +
-            "   public void run(Object... args) { " + System.lineSeparator() +
+            "   public static void run(List<Map<String, Attribute>> args) { " + System.lineSeparator() +
             "       %s " + System.lineSeparator() +
             "   }" + System.lineSeparator() +
             "}";
 
     public static int translatorCount = 0;
 
-    public Translator(String grammarName, Code code) throws CreateTranslatorWithCurrentCodeException {
+    public Translator(String name, Class<?> codeClass, List<Argument> args, TranslatorType translatorType) {
+        super(name);
+        this.codeClass = codeClass;
+        this.args = args;
+        this.translatorType = translatorType;
+    }
+
+    public Translator(String grammarName, Code code, TranslatorType translatorType) throws CreateTranslatorWithCurrentCodeException {
         super("Translator" + (Translator.translatorCount++));
 
         String name = super.getName();
 
-        this.argsString = code.argsString;
+        this.args = parseArgumentList(code.argsString);
+        this.translatorType = translatorType;
 
         try {
             Path sourcePath = Paths.get("src", "main", "resources", grammarName, "java", name + ".java");
@@ -87,12 +146,20 @@ public class Translator extends NonTerminal {
         return codeClass;
     }
 
-    public void setArgsString(String argsString) {
-        this.argsString = argsString;
+    public List<Argument> getArgs() {
+        return args;
     }
 
-    public String getArgsString() {
-        return argsString;
+    public void setArgs(List<Argument> args) {
+        this.args = args;
+    }
+
+    public void setArgs(String argsString) {
+        this.args = parseArgumentList(argsString);
+    }
+
+    public TranslatorType getTranslatorType() {
+        return translatorType;
     }
 
     @Override

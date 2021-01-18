@@ -4,10 +4,14 @@ GrammarParserLexer.class
 AntlrGrammarParserLexer.class
 grammar\objects\nonterminals\translators\Translator.class
 grammar\objects\attributes\Attribute.class
+grammar\objects\nonterminals\translators\Translator$Argument.class
 AntlrGrammarParserParser$TranslatorArgsContext.class
 exceptions\grammar\GrammarRuleParseException.class
 grammar\Grammar.class
 GrammarParserParser.class
+grammar\objects\nonterminals\translators\Translator$TranslatorType.class
+grammar\objects\nonterminals\translators\CopyTranslator.class
+grammar\objects\nonterminals\translators\ReturnTranslator.class
 AntlrGrammarParserParser$RuleAttrsContext.class
 AntlrGrammarParserParser$RuleListContext.class
 exceptions\lexic\tokenizer\TokenizerParseException.class
@@ -26,7 +30,6 @@ AntlrGrammarParserParser.class
 AntlrGrammarParserParser$TranslatorReturnContext.class
 AntlrGrammarParserParser$AtLeastWhitespacesContext.class
 exceptions\syntax\ExpressionParserException.class
-grammar\objects\attributes\Attribute$AttributeType.class
 AntlrGrammarParserParser$ParseContext.class
 AntlrGrammarParserParser$TerminalContext.class
 AntlrGrammarParserParser$NonTerminalListContext.class

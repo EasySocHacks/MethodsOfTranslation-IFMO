@@ -7,21 +7,17 @@ terminals:
   - ) : WHITESPACELESS
   - var : VARIABLE
 non-terminals:
-  - S
+  - S {ans}
   - XOR
   - OR
   - AND
   - NOT
   - BRACKETS
+  - A {ans}
+  - B {ans}
 start-non-terminal: S
 rules:
-  - S -> XOR[([1].value, [0].a, [0].b) -> args[0] = (int)args[1] + (int)args[2];]
-  - XOR -> OR xor XOR
-  - XOR -> OR
-  - OR -> AND or OR
-  - OR -> AND
-  - AND -> NOT and AND
-  - AND -> NOT
-  - NOT -> not NOT
-  - NOT -> BRACKETS
-  - BRACKETS -> var
+  - S -> A {([0], [1]) -> args.get(0).get("ans").setValue(args.get(1).get("ans").getValue());}
+  - A -> A B or {([0], [1]) -> args.get(0).get("ans").setValue((int)args.get(0).get("ans").getValue() + (int)args.get(1).get("ans").getValue());}
+  - A -> xor {([0]) -> args.get(0).get("ans").setValue((int)0);}
+  - B -> eps {([0]) -> args.get(0).get("ans").setValue((int)1);}

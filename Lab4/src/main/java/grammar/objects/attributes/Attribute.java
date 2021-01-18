@@ -2,43 +2,32 @@ package grammar.objects.attributes;
 
 import java.util.Objects;
 
-public class Attribute<T> {
-    public enum AttributeType {
-        SYNTHESIZED, //return
-        INHERITED //args
-    }
-
+public class Attribute {
     private final String name;
-    private final AttributeType type;
 
-    private T value;
+    private Object value = null;
 
-    public Attribute(String name, AttributeType type) {
+    public Attribute(String name) {
         this.name = name;
-        this.type = type;
     }
 
     public String getName() {
         return name;
     }
 
-    public AttributeType getType() {
-        return type;
-    }
-
-    public T getValue() {
+    public Object getValue() {
         return value;
     }
 
     public void setValue(Object value) {
-        this.value = (T) value;
+        this.value = value;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Attribute<?> attribute = (Attribute<?>) o;
+        Attribute attribute = (Attribute) o;
         return name.equals(attribute.name);
     }
 
@@ -49,6 +38,6 @@ public class Attribute<T> {
 
     @Override
     public String toString() {
-        return String.format("%s : %s", getName(), getType().name());
+        return String.format("%s", getName());
     }
 }

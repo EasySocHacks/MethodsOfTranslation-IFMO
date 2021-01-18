@@ -1,0 +1,16 @@
+package grammar.objects.nonterminals.translators;
+
+import exceptions.grammar.CreateTranslatorWithCurrentCodeException;
+
+public class ReturnTranslator extends Translator {
+    private static String code =
+            "for (String attributeName : args.get(0).keySet()) {" + System.lineSeparator() +
+            "   if (args.get(0).get(attributeName).getValue() != null && args.get(1).get(attributeName).getValue() == null) {" + System.lineSeparator() +
+            "       args.get(1).get(attributeName).setValue(args.get(0).get(attributeName).getValue());" + System.lineSeparator() +
+            "   }" + System.lineSeparator() +
+            "}";
+
+    public ReturnTranslator(String grammarName) throws CreateTranslatorWithCurrentCodeException {
+        super(grammarName, new Code("", code), TranslatorType.RETURN_TRANSLATOR);
+    }
+}

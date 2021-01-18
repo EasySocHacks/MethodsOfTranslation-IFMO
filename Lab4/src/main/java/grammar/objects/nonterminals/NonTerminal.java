@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public class NonTerminal implements GrammarObject {
     private final String name;
-    private final HashMap<String, Attribute<?>> attributes = new HashMap<>();
+    private HashMap<String, Attribute> attributes = new HashMap<>();
 
     public NonTerminal(String name) {
         this.name = name;
@@ -42,7 +42,12 @@ public class NonTerminal implements GrammarObject {
     }
 
     @Override
-    public Map<String, Attribute<?>> getAttributes() {
+    public Map<String, Attribute> getAttributes() {
         return attributes;
+    }
+
+    @Override
+    public void setAttributes(Map<String, Attribute> attributes) {
+        this.attributes = new HashMap<>(attributes);
     }
 }

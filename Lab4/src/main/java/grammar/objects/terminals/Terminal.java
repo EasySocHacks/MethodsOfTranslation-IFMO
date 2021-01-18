@@ -9,7 +9,7 @@ import java.util.Objects;
 
 @SuppressWarnings("rawtypes")
 public class Terminal<T> implements GrammarObject {
-    private final HashMap<String, Attribute<?>> attributes = new HashMap<>();
+    private Map<String, Attribute> attributes = new HashMap<>();
     
     public static final Terminal EPSILON = new Terminal("eps");
     public static final Terminal EOS = new Terminal("$");
@@ -108,7 +108,12 @@ public class Terminal<T> implements GrammarObject {
     }
 
     @Override
-    public Map<String, Attribute<?>> getAttributes() {
+    public Map<String, Attribute> getAttributes() {
         return attributes;
+    }
+
+    @Override
+    public void setAttributes(Map<String, Attribute> attributes) {
+        this.attributes = attributes;
     }
 }

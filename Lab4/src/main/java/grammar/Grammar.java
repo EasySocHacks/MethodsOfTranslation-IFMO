@@ -1,8 +1,11 @@
 package grammar;
 
+import exceptions.grammar.CreateTranslatorWithCurrentCodeException;
 import exceptions.grammar.GrammarRuleParseException;
 import grammar.objects.GrammarObject;
 import grammar.objects.nonterminals.NonTerminal;
+import grammar.objects.nonterminals.translators.CopyTranslator;
+import grammar.objects.nonterminals.translators.ReturnTranslator;
 import grammar.objects.nonterminals.translators.Translator;
 import grammar.objects.terminals.Terminal;
 import grammar.rules.Rule;
@@ -19,6 +22,8 @@ public class Grammar {
     private final String[] terminalDeniedSubstrings = {"'", "$"};
     private final String[] nonTerminalDeniedSubstrings = {"'", "$"};
 
+    private String grammarName;
+
     private List<Terminal> terminals;
 
     private List<NonTerminal> nonTerminals;
@@ -31,7 +36,12 @@ public class Grammar {
 
     public Grammar() {}
 
-    public Grammar(List<Terminal> terminals, List<NonTerminal> nonTerminals, NonTerminal startNonTerminal, List<Rule> ruleList) {
+    public Grammar(String grammarName) {
+        this.grammarName = grammarName;
+    }
+
+    public Grammar(String grammarName, List<Terminal> terminals, List<NonTerminal> nonTerminals, NonTerminal startNonTerminal, List<Rule> ruleList) {
+        this.grammarName = grammarName;
         this.terminals = terminals;
         this.nonTerminals = nonTerminals;
         this.startNonTerminal = startNonTerminal;
@@ -42,6 +52,7 @@ public class Grammar {
         checkTerminals();
         checkNonTerminals();
         checkStartNonTerminal();
+        addAttributes();
         findTranslators();
         deleteRecursion();
     }
@@ -57,7 +68,14 @@ public class Grammar {
     private boolean deleteRightBranching() {
         for (int i = 0; i < ruleList.size(); i++) {
             Rule ruleI = ruleList.get(i);
+
+            if (ruleI.getGrammarObjectsList().get(0).equals(Terminal.EPSILON)) {
+                continue;
+            }
+
             NonTerminal possibleNewNonTerminal = new NonTerminal(ruleI.getFromNonTerminal().getName() + "'r");
+
+            possibleNewNonTerminal.setAttributes(ruleI.getFromNonTerminal().getAttributes());
 
             boolean foundRightBranching = false;
             for (int j = i + 1; j < ruleList.size(); j++) {
@@ -67,29 +85,114 @@ public class Grammar {
                 ruleI.getGrammarObjectsList().get(0).equals(ruleJ.getGrammarObjectsList().get(0))) {
                     foundRightBranching = true;
 
+                    List<GrammarObject> newGrammarObjectList = new ArrayList<>();
+
+                    for (int k = 1; k < ruleJ.getGrammarObjectsList().size(); k++) {
+                        GrammarObject grammarObject = ruleJ.getGrammarObjectsList().get(k);
+
+                        if (!(grammarObject instanceof Translator)) {
+                            newGrammarObjectList.add(grammarObject);
+                            continue;
+                        }
+
+                        List<Translator.Argument> newArgumentList = new ArrayList<>();
+
+                        for (Translator.Argument argument : ((Translator) grammarObject).getArgs()) {
+                            if (argument.getRulePosition() >= 1) {
+                                newArgumentList.add(
+                                        new Translator.Argument(argument.getRulePosition() - 1));
+                            } else {
+                                newArgumentList.add(argument);
+                            }
+                        }
+
+                        Translator newTranslator = new Translator(
+                                grammarObject.getName(),
+                                ((Translator) grammarObject).getCodeClass(),
+                                newArgumentList,
+                                ((Translator) grammarObject).getTranslatorType());
+
+                        ruleList.add(new Rule(newTranslator, Collections.singletonList(Terminal.EPSILON)));
+                        nonTerminals.add(newTranslator);
+
+                        newGrammarObjectList.add(newTranslator);
+                    }
+
+                    if (newGrammarObjectList.isEmpty()) {
+                        newGrammarObjectList.add(Terminal.EPSILON);
+                    }
+
                     ruleList.set(j, new Rule(
                             possibleNewNonTerminal,
-                            (ruleJ.getGrammarObjectsList().size() == 1
-                                    ? Collections.singletonList((GrammarObject) Terminal.EPSILON)
-                                    : ruleJ.getGrammarObjectsList().subList(1, ruleJ.getGrammarObjectsList().size()))
-                    ));
+                            newGrammarObjectList));
                 }
             }
 
             if (foundRightBranching) {
                 nonTerminals.add(possibleNewNonTerminal);
 
+                List<GrammarObject> newGrammarObjectList = new ArrayList<>();
+
+                for (int k = 1; k < ruleI.getGrammarObjectsList().size(); k++) {
+                    GrammarObject grammarObject = ruleI.getGrammarObjectsList().get(k);
+
+                    if (!(grammarObject instanceof Translator)) {
+                        newGrammarObjectList.add(grammarObject);
+                        continue;
+                    }
+
+                    List<Translator.Argument> newArgumentList = new ArrayList<>();
+
+                    for (Translator.Argument argument : ((Translator) grammarObject).getArgs()) {
+                        if (argument.getRulePosition() >= 1) {
+                            newArgumentList.add(
+                                new Translator.Argument(argument.getRulePosition() - 1));
+                        } else {
+                            newArgumentList.add(argument);
+                        }
+                    }
+
+                    Translator newTranslator = new Translator(
+                            grammarObject.getName(),
+                            ((Translator) grammarObject).getCodeClass(),
+                            newArgumentList,
+                            ((Translator) grammarObject).getTranslatorType());
+
+                    ruleList.add(new Rule(newTranslator, Collections.singletonList(Terminal.EPSILON)));
+                    nonTerminals.add(newTranslator);
+
+                    newGrammarObjectList.add(newTranslator);
+                }
+
+                if (newGrammarObjectList.isEmpty()) {
+                    newGrammarObjectList.add(Terminal.EPSILON);
+                }
+
                 ruleList.set(i, new Rule(
                         possibleNewNonTerminal,
-                        (ruleI.getGrammarObjectsList().size() == 1
-                                ? Collections.singletonList((GrammarObject) Terminal.EPSILON)
-                                : ruleI.getGrammarObjectsList().subList(1, ruleI.getGrammarObjectsList().size()))
-                ));
+                        newGrammarObjectList));
 
-                ruleList.add(new Rule(
-                        ruleI.getFromNonTerminal(),
-                        Arrays.asList(ruleI.getGrammarObjectsList().get(0), possibleNewNonTerminal)
-                ));
+                try {
+                    Translator copyTranslator = new CopyTranslator(grammarName);
+                    Translator returnTranslator = new ReturnTranslator(grammarName);
+
+                    nonTerminals.add(copyTranslator);
+                    nonTerminals.add(returnTranslator);
+
+                    ruleList.add(new Rule(copyTranslator, Collections.singletonList(Terminal.EPSILON)));
+                    ruleList.add(new Rule(returnTranslator, Collections.singletonList(Terminal.EPSILON)));
+
+                    ruleList.add(new Rule(
+                            ruleI.getFromNonTerminal(),
+                            Arrays.asList(
+                                    ruleI.getGrammarObjectsList().get(0),
+                                    copyTranslator,
+                                    possibleNewNonTerminal,
+                                    returnTranslator)
+                    ));
+                } catch (CreateTranslatorWithCurrentCodeException e) {
+                    e.printStackTrace();
+                }
 
                 return true;
             }
@@ -103,6 +206,8 @@ public class Grammar {
             if (ruleList.get(i).getFromNonTerminal().equals(ruleList.get(i).getGrammarObjectsList().get(0))) {
                 NonTerminal recursiveNonTerminal = ruleList.get(i).getFromNonTerminal();
                 NonTerminal newNonTerminal = new NonTerminal(recursiveNonTerminal.getName() + "'l");
+
+                newNonTerminal.setAttributes(recursiveNonTerminal.getAttributes());
 
                 boolean foundDirectlyLeftRecursion = false;
 
@@ -126,20 +231,120 @@ public class Grammar {
 
                     if (ruleJ.getFromNonTerminal().equals(recursiveNonTerminal)) {
                         if (ruleJ.getGrammarObjectsList().get(0).equals(recursiveNonTerminal)) {
-                            ruleList.set(j, new Rule(
-                                    newNonTerminal,
-                                    ruleJ.getGrammarObjectsList().subList(1, ruleJ.getGrammarObjectsList().size())
-                            ));
+                            List<GrammarObject> newGrammarObjectList = new ArrayList<>();
+
+                            for (int k = 1; k < ruleJ.getGrammarObjectsList().size(); k++) {
+                                GrammarObject gObj = ruleJ.getGrammarObjectsList().get(k);
+
+                                if (!(gObj instanceof Translator)) {
+                                    newGrammarObjectList.add(gObj);
+                                    continue;
+                                }
+
+                                if (k == ruleJ.getGrammarObjectsList().size() - 1) {
+                                    continue;
+                                }
+
+                                List<Translator.Argument> newArgumentList = new ArrayList<>();
+
+                                for (Translator.Argument argument : ((Translator) gObj).getArgs()) {
+                                    if (argument.getRulePosition() >= 1) {
+                                        newArgumentList.add(new Translator.Argument(
+                                                argument.getRulePosition() - 1));
+                                    } else {
+                                        newArgumentList.add(new Translator.Argument(
+                                                argument.getRulePosition()));
+                                    }
+                                }
+
+                                Translator newTranslator = new Translator(
+                                        gObj.getName(),
+                                        ((Translator) gObj).getCodeClass(),
+                                        newArgumentList,
+                                        ((Translator) gObj).getTranslatorType());
+
+                                ruleList.add(new Rule(newTranslator, Collections.singletonList(Terminal.EPSILON)));
+                                nonTerminals.add(newTranslator);
+
+                                newGrammarObjectList.add(newTranslator);
+                            }
+
+                            GrammarObject lastGrammarObject = ruleJ.getGrammarObjectsList().get(ruleJ.getGrammarObjectsList().size() - 1);
+
+                            if (lastGrammarObject instanceof Translator) {
+                                if (((Translator) lastGrammarObject).getTranslatorType().equals(Translator.TranslatorType.RETURN)) {
+                                    List<Translator.Argument> newArgumentList = new ArrayList<>(((Translator) lastGrammarObject).getArgs());
+                                    newArgumentList.set(0, new Translator.Argument(
+                                            ruleJ.getGrammarObjectsList().size()));
+
+                                    Translator newTranslator = new Translator(
+                                            lastGrammarObject.getName(),
+                                            ((Translator) lastGrammarObject).getCodeClass(),
+                                            newArgumentList,
+                                            Translator.TranslatorType.ARGS);
+
+                                    ruleList.add(new Rule(newTranslator, Collections.singletonList(Terminal.EPSILON)));
+                                    nonTerminals.add(newTranslator);
+
+                                    ruleJ.getGrammarObjectsList().set(
+                                            ruleJ.getGrammarObjectsList().size() - 1,
+                                            newTranslator);
+                                }
+                            }
+
+                            ruleList.set(j, new Rule(newNonTerminal, newGrammarObjectList));
+                        } else {
+                            GrammarObject lastGrammarObject = ruleJ.getGrammarObjectsList().get(ruleJ.getGrammarObjectsList().size() - 1);
+
+                            if (lastGrammarObject instanceof Translator) {
+                                if (((Translator)lastGrammarObject).getTranslatorType().equals(Translator.TranslatorType.RETURN)) {
+                                    int count = 0;
+                                    for (GrammarObject g : ruleJ.getGrammarObjectsList()) {
+                                        if (!(g instanceof Terminal))
+                                            count++;
+                                    }
+
+                                    List<Translator.Argument> newArgumentList = new ArrayList<>(((Translator) lastGrammarObject).getArgs());
+                                    newArgumentList.set(0, new Translator.Argument(count + 1));
+
+                                    Translator newTranslator = new Translator(
+                                            lastGrammarObject.getName(),
+                                            ((Translator) lastGrammarObject).getCodeClass(),
+                                            newArgumentList,
+                                            Translator.TranslatorType.ARGS);
+
+                                    ruleList.add(new Rule(newTranslator, Collections.singletonList(Terminal.EPSILON)));
+                                    nonTerminals.add(newTranslator);
+
+                                    ruleJ.getGrammarObjectsList().set(
+                                            ruleJ.getGrammarObjectsList().size() - 1,
+                                            newTranslator);
+                                }
+                            }
                         }
 
-                        ruleList.get(j).getGrammarObjectsList().add(newNonTerminal);
+                        try {
+                            Translator copyTranslator = new CopyTranslator(grammarName);
+                            Translator returnTranslator = new ReturnTranslator(grammarName);
+
+                            nonTerminals.add(copyTranslator);
+                            nonTerminals.add(returnTranslator);
+
+                            ruleList.add(new Rule(copyTranslator, Collections.singletonList(Terminal.EPSILON)));
+                            ruleList.add(new Rule(returnTranslator, Collections.singletonList(Terminal.EPSILON)));
+
+                            ruleList.get(j).getGrammarObjectsList().add(copyTranslator);
+                            ruleList.get(j).getGrammarObjectsList().add(newNonTerminal);
+                            ruleList.get(j).getGrammarObjectsList().add(returnTranslator);
+                        } catch (CreateTranslatorWithCurrentCodeException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
 
                 ruleList.add(new Rule(
                         newNonTerminal,
-                        Collections.singletonList((GrammarObject) Terminal.EPSILON)
-                ));
+                        Collections.singletonList(Terminal.EPSILON)));
 
                 return true;
             }
@@ -199,6 +404,44 @@ public class Grammar {
 
         for (Translator translator : translators) {
             ruleList.add(new Rule(translator, Collections.singletonList((GrammarObject) Terminal.EPSILON)));
+        }
+
+        nonTerminals.addAll(translators);
+    }
+
+    private void addAttributes() {
+        for (NonTerminal nonTerminal : nonTerminals) {
+            if (startNonTerminal.equals(nonTerminal)) {
+                startNonTerminal.setAttributes(nonTerminal.getAttributes());
+                break;
+            }
+        }
+
+        for (Rule rule : ruleList) {
+            for (NonTerminal nonTerminal : nonTerminals) {
+                if (rule.getFromNonTerminal().equals(nonTerminal)) {
+                    rule.getFromNonTerminal().setAttributes(nonTerminal.getAttributes());
+                    break;
+                }
+            }
+
+            for (GrammarObject grammarObject : rule.getGrammarObjectsList()) {
+                if (grammarObject instanceof Terminal) {
+                    for (Terminal terminal : terminals) {
+                        if (grammarObject.equals(terminal)) {
+                            grammarObject.setAttributes(terminal.getAttributes());
+                            break;
+                        }
+                    }
+                } else {
+                    for (NonTerminal nonTerminal : nonTerminals) {
+                        if (grammarObject.equals(nonTerminal)) {
+                            grammarObject.setAttributes(nonTerminal.getAttributes());
+                            break;
+                        }
+                    }
+                }
+            }
         }
     }
 

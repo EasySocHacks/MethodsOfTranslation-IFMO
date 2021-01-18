@@ -1,7 +1,10 @@
 import exceptions.grammar.GrammarRuleParseException;
+import exceptions.lexic.tokenizer.TokenizerParseException;
+import exceptions.syntax.ExpressionParserException;
 import grammar.Grammar;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import syntax.ExpressionParser;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -36,9 +39,22 @@ public class Main {
             e.printStackTrace();
         }
 
+        ExpressionParser expressionParser = new ExpressionParser(grammar);
+        ExpressionParser.Node node = null;
+
+        System.out.println(node);
+
         System.out.println(grammar);
         System.out.println(grammar.getNonTerminals());
         System.out.println(grammar.getTerminals());
         System.out.println(grammar.getRuleList());
+
+        try {
+            node = expressionParser.parse("xor or");
+        } catch (TokenizerParseException | ExpressionParserException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("ANSWER: " + node.getGrammarObject().getAttributes().get("ans").getValue());
     }
 }

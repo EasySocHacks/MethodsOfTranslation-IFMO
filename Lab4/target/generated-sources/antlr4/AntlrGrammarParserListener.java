@@ -8,8 +8,8 @@
     import grammar.objects.GrammarObject;
     import grammar.objects.nonterminals.translators.Translator;
     import grammar.objects.nonterminals.translators.Translator.Code;
+    import grammar.objects.nonterminals.translators.Translator.TranslatorType;
     import grammar.objects.attributes.Attribute;
-    import grammar.objects.attributes.Attribute.AttributeType;
     import exceptions.grammar.CreateTranslatorWithCurrentCodeException;
 
 import org.antlr.v4.runtime.tree.ParseTreeListener;
