@@ -1,60 +1,25 @@
-import exceptions.grammar.GrammarRuleParseException;
 import exceptions.lexic.tokenizer.TokenizerParseException;
 import exceptions.syntax.ExpressionParserException;
 import grammar.Grammar;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
 import syntax.ExpressionParser;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
+import visualizer.GraphVisualizer;
 
 public class Main {
     public static void main(String args[]) {
-        StringBuilder grammarStringBuilder = new StringBuilder();
-
-        try {
-            Scanner scanner = new Scanner(new File("src/main/java/resources/grammar"));
-
-            while (scanner.hasNextLine()) {
-                grammarStringBuilder.append(scanner.nextLine());
-
-                if (scanner.hasNextLine()) {
-                    grammarStringBuilder.append(System.lineSeparator());
-                }
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        
-        AntlrGrammarParserLexer lexer = new AntlrGrammarParserLexer(CharStreams.fromString(grammarStringBuilder.toString()));
-
-        CommonTokenStream commonTokenStream = new CommonTokenStream(lexer);
-        AntlrGrammarParserParser grammarParser = new AntlrGrammarParserParser(commonTokenStream);
-        Grammar grammar = grammarParser.parse("grammar").grammar;
-        try {
-            grammar.buildGrammar();
-        } catch (GrammarRuleParseException e) {
-            e.printStackTrace();
-        }
+        Grammar grammar = GrammarBuilder.buildGrammar("calculatorGrammar");
 
         ExpressionParser expressionParser = new ExpressionParser(grammar);
         ExpressionParser.Node node = null;
 
-        System.out.println(node);
-
-        System.out.println(grammar);
-        System.out.println(grammar.getNonTerminals());
-        System.out.println(grammar.getTerminals());
-        System.out.println(grammar.getRuleList());
-
         try {
-            node = expressionParser.parse("xor or");
+            node = expressionParser.parse("(1 + 2)");
         } catch (TokenizerParseException | ExpressionParserException e) {
             e.printStackTrace();
         }
 
         System.out.println("ANSWER: " + node.getGrammarObject().getAttributes().get("ans").getValue());
+
+        GraphVisualizer graphVisualizer = new GraphVisualizer(node);
+        graphVisualizer.visualize();
     }
 }

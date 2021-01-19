@@ -273,9 +273,21 @@ public class Grammar {
 
                             if (lastGrammarObject instanceof Translator) {
                                 if (((Translator) lastGrammarObject).getTranslatorType().equals(Translator.TranslatorType.RETURN)) {
+                                    int count = 0;
+                                    for (GrammarObject g : ruleJ.getGrammarObjectsList()) {
+                                        if (!(g instanceof Translator))
+                                            count++;
+                                    }
+
                                     List<Translator.Argument> newArgumentList = new ArrayList<>(((Translator) lastGrammarObject).getArgs());
-                                    newArgumentList.set(0, new Translator.Argument(
-                                            ruleJ.getGrammarObjectsList().size()));
+                                    newArgumentList.set(0, new Translator.Argument(count));
+
+                                    for (int q = 1; q < newArgumentList.size(); q++) {
+                                        if (newArgumentList.get(q).getRulePosition() >= 1) {
+                                            newArgumentList.set(q, new Translator.Argument(
+                                                    newArgumentList.get(q).getRulePosition() - 1));
+                                        }
+                                    }
 
                                     Translator newTranslator = new Translator(
                                             lastGrammarObject.getName(),
@@ -286,9 +298,7 @@ public class Grammar {
                                     ruleList.add(new Rule(newTranslator, Collections.singletonList(Terminal.EPSILON)));
                                     nonTerminals.add(newTranslator);
 
-                                    ruleJ.getGrammarObjectsList().set(
-                                            ruleJ.getGrammarObjectsList().size() - 1,
-                                            newTranslator);
+                                    newGrammarObjectList.add(newTranslator);
                                 }
                             }
 
@@ -300,7 +310,7 @@ public class Grammar {
                                 if (((Translator)lastGrammarObject).getTranslatorType().equals(Translator.TranslatorType.RETURN)) {
                                     int count = 0;
                                     for (GrammarObject g : ruleJ.getGrammarObjectsList()) {
-                                        if (!(g instanceof Terminal))
+                                        if (!(g instanceof Translator))
                                             count++;
                                     }
 

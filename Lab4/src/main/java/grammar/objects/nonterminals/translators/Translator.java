@@ -102,10 +102,9 @@ public class Translator extends NonTerminal {
         this.translatorType = translatorType;
     }
 
-    public Translator(String grammarName, Code code, TranslatorType translatorType) throws CreateTranslatorWithCurrentCodeException {
-        super("Translator" + (Translator.translatorCount++));
-
-        String name = super.getName();
+    public Translator(String grammarName, String name, Code code, TranslatorType translatorType)
+            throws CreateTranslatorWithCurrentCodeException {
+        super(name);
 
         this.args = parseArgumentList(code.argsString);
         this.translatorType = translatorType;
@@ -140,6 +139,10 @@ public class Translator extends NonTerminal {
                             name, System.lineSeparator(), code.argsString, code.codeString, System.lineSeparator()),
                     e);
         }
+    }
+
+    public Translator(String grammarName, Code code, TranslatorType translatorType) throws CreateTranslatorWithCurrentCodeException {
+        this(grammarName, "Translator" + (Translator.translatorCount++), code, translatorType);
     }
 
     public Class<?> getCodeClass() {

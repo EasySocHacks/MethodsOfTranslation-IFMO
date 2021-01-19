@@ -48,6 +48,14 @@ public class NonTerminal implements GrammarObject {
 
     @Override
     public void setAttributes(Map<String, Attribute> attributes) {
-        this.attributes = new HashMap<>(attributes);
+        this.attributes = new HashMap<>();
+
+        try {
+            for (String attributeName : attributes.keySet()) {
+                this.attributes.put(attributeName, (Attribute) attributes.get(attributeName).clone());
+            }
+        } catch (CloneNotSupportedException e){
+            e.printStackTrace();
+        }
     }
 }

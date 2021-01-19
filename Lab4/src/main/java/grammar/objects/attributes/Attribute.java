@@ -2,7 +2,7 @@ package grammar.objects.attributes;
 
 import java.util.Objects;
 
-public class Attribute {
+public class Attribute implements Cloneable {
     private final String name;
 
     private Object value = null;
@@ -38,6 +38,14 @@ public class Attribute {
 
     @Override
     public String toString() {
-        return String.format("%s", getName());
+        if (value == null)
+            return "null";
+
+        return value.toString();
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

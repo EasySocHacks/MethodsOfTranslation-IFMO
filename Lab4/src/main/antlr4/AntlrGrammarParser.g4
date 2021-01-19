@@ -27,7 +27,7 @@ parse [String grammarName] returns [Grammar grammar]
 
 terminalList returns [List<Terminal> list]
     :   'terminals:' { $list = new ArrayList(); }
-        (lineSeparator maybeWhitespaces '-' atLeastWhitespaces terminalValue=terminal
+        (lineSeparator maybeWhitespaces terminalValue=terminal
         (
             maybeWhitespaces ':' maybeWhitespaces optionValue=terminalOption
             { $terminalValue.term = new Terminal($terminalValue.term.getName(), $optionValue.option); }
@@ -58,7 +58,7 @@ terminalOption returns [TerminalOption option]
 nonTerminalList returns [List<NonTerminal> list]
     :   'non-terminals:' { $list = new ArrayList(); }
         (
-            lineSeparator maybeWhitespaces '-' atLeastWhitespaces nonTerminalValue=nonTerminal
+            lineSeparator maybeWhitespaces nonTerminalValue=nonTerminal
             (
                 maybeWhitespaces '{' maybeWhitespaces
                 attributeFirstValue=attribute
@@ -84,7 +84,7 @@ startNonTerminal returns [NonTerminal start]
 
 ruleList [String grammarName] returns [List<Rule> list]
     :   'rules:' { $list = new ArrayList(); }
-        (lineSeparator maybeWhitespaces '-' atLeastWhitespaces ruleAttrsValue=ruleAttrs[$grammarName]
+        (lineSeparator maybeWhitespaces ruleAttrsValue=ruleAttrs[$grammarName]
         { $list.add(new Rule($ruleAttrsValue.fromNonTerminal, $ruleAttrsValue.grammarObjectsList)); })+
     ;
 
@@ -183,6 +183,14 @@ LowName
             ')'
             |
             ('0'..'9')
+            |
+            '+'
+            |
+            '-'
+            |
+            '*'
+            |
+            '/'
         )+
     ;
 
@@ -208,7 +216,7 @@ ClassName
     ;
 
 Code
-    :   ((LowName | HighName | '='+ | '+'+ | '*'+ | '/'+ | ('0'..'9')+ | ';'+ | '.'+ | '('+ | ')'+ | '<'+ | '>'+ | '%'+ | '['+ | ']'+ | '"'+)
+    :   ((LowName | HighName | '='+ | '+'+ | '*'+ | '/'+ | ('0'..'9')+ | ';'+ | '.'+ | '('+ | ')'+ | '%'+ | '['+ | ']'+ | '"'+)
         Whitespace*)+
         ';'
     ;

@@ -16,7 +16,8 @@ public class Terminal<T> implements GrammarObject {
 
     public enum TerminalOption {
         WHITESPACELESS,
-        VARIABLE(true, "[a-zA-Z]");
+        VARIABLE(true, "[a-zA-Z]"),
+        NUMBER(true, "[0-9]+");
 
         private boolean containsExtraValue = false;
         private String regex = "";

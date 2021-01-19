@@ -78,9 +78,6 @@ public class ExpressionParser {
     }
 
     public ExpressionParser(Grammar grammar) {
-        //GrammarParser grammarParser = new GrammarParser();
-
-        //this.grammar = grammarParser.getGrammar();
         this.grammar = grammar;
         this.syntaxAnalyzer = new SyntaxAnalyzer(grammar);
     }
@@ -116,8 +113,11 @@ public class ExpressionParser {
         return firstList;
     }
 
-    private Node parseNonTerminal(NonTerminal nonTerminal) throws TokenizerParseException, ExpressionParserException {
-        Node node = new Node(nonTerminal);
+    private Node parseNonTerminal(NonTerminal copingNonTerminal) throws TokenizerParseException, ExpressionParserException {
+        NonTerminal nonTerminal = new NonTerminal(copingNonTerminal.getName());
+        nonTerminal.setAttributes(copingNonTerminal.getAttributes());
+
+        Node node = new Node(new NonTerminal(nonTerminal.getName()));
         node.grammarObject.setAttributes(nonTerminal.getAttributes());
 
         for (Rule rule : grammar.getRuleList()) {
@@ -145,7 +145,17 @@ public class ExpressionParser {
                     }
 
                     Node newNode = new Node(lexicalAnalyzer.getToken());
+                    //TODO: when args, copy attrs and remind
                     newNode.grammarObject.setAttributes(lexicalAnalyzer.getToken().getAttributes());
+
+                    if (lexicalAnalyzer.getToken().getExtraValue() != null) {
+                        if (!newNode.getGrammarObject().getAttributes().containsKey("extraValue")) {
+                            newNode.getGrammarObject().getAttributes().put("extraValue",
+                                    new Attribute("extraValue"));
+                        }
+
+                        newNode.getGrammarObject().getAttributes().get("extraValue").setValue(lexicalAnalyzer.getToken().getExtraValue());
+                    }
 
                     node.getChildren().add(newNode);
                     lexicalAnalyzer.nextToken();
@@ -169,6 +179,7 @@ public class ExpressionParser {
                     List<Map<String, Attribute>> args = new ArrayList<>();
 
                     for (Translator.Argument argument : ((Translator) grammarObject).getArgs()) {
+
                         if (argument.getRulePosition() == 0) {
                             args.add(node.grammarObject.getAttributes());
                         } else {
