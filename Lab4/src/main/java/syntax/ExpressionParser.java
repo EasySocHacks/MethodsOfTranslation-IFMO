@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("rawtypes")
 public class ExpressionParser {
     private final Grammar grammar;
     private final SyntaxAnalyzer syntaxAnalyzer;
@@ -113,12 +114,22 @@ public class ExpressionParser {
         return firstList;
     }
 
-    private Node parseNonTerminal(NonTerminal copingNonTerminal) throws TokenizerParseException, ExpressionParserException {
-        NonTerminal nonTerminal = new NonTerminal(copingNonTerminal.getName());
-        nonTerminal.setAttributes(copingNonTerminal.getAttributes());
+    private GrammarObject remind = null;
 
-        Node node = new Node(new NonTerminal(nonTerminal.getName()));
-        node.grammarObject.setAttributes(nonTerminal.getAttributes());
+    private Node parseNonTerminal(NonTerminal copingNonTerminal) throws TokenizerParseException, ExpressionParserException {
+        boolean doesSmth = false;
+
+        NonTerminal nonTerminal = new NonTerminal(copingNonTerminal.getName());
+
+        if (remind != null) {
+            nonTerminal.setAttributes(remind.getAttributes());
+
+            remind = null;
+        } else {
+            nonTerminal.setAttributes(copingNonTerminal.getAttributes());
+        }
+
+        Node node = new Node(nonTerminal);
 
         for (Rule rule : grammar.getRuleList()) {
             if (!rule.getFromNonTerminal().equals(nonTerminal)) {
@@ -148,6 +159,15 @@ public class ExpressionParser {
                     //TODO: when args, copy attrs and remind
                     newNode.grammarObject.setAttributes(lexicalAnalyzer.getToken().getAttributes());
 
+                    if (remind != null) {
+                        for (String attributeName : remind.getAttributes().keySet()) {
+                            newNode.getGrammarObject().getAttributes().get(attributeName).setValue(
+                                    remind.getAttributes().get(attributeName).getValue());
+                        }
+
+                        remind = null;
+                    }
+
                     if (lexicalAnalyzer.getToken().getExtraValue() != null) {
                         if (!newNode.getGrammarObject().getAttributes().containsKey("extraValue")) {
                             newNode.getGrammarObject().getAttributes().put("extraValue",
@@ -164,15 +184,40 @@ public class ExpressionParser {
                 }
 
                 if (grammarObject instanceof Translator) {
+                    doesSmth = true;
+
                     boolean isArgs = false;
 
-                    if (((Translator) grammarObject).getTranslatorType().equals(Translator.TranslatorType.ARGS)) {
+                    if (((Translator) grammarObject).getTranslatorType().equals(Translator.TranslatorType.ARGS) ||
+                            ((Translator) grammarObject).getTranslatorType().equals(Translator.TranslatorType.COPY_TRANSLATOR) ||
+                            ((Translator) grammarObject).getTranslatorType().equals(Translator.TranslatorType.RIGHT_BRANCHING_ARGS_TRANSLATOR)) {
                         isArgs = true;
 
-                        if (rule.getGrammarObjectsList().get(i + 1) instanceof Translator) {
-                            node.children.add(new Node(rule.getGrammarObjectsList().get(i + 2)));
+                        if (remind != null) {
+                            node.children.add(new Node(remind));
+
                         } else {
-                            node.children.add(new Node(rule.getGrammarObjectsList().get(i + 1)));
+                            if (rule.getGrammarObjectsList().get(i + 1) instanceof Translator) {
+                                if (rule.getGrammarObjectsList().get(i + 2) instanceof NonTerminal) {
+                                    node.children.add(new Node(new NonTerminal(rule.getGrammarObjectsList().get(i + 2).getName())));
+                                    node.children.get(node.children.size() - 1).getGrammarObject().setAttributes(
+                                            rule.getGrammarObjectsList().get(i + 2).getAttributes());
+                                } else {
+                                    node.children.add(new Node(new Terminal(rule.getGrammarObjectsList().get(i + 2).getName())));
+                                    node.children.get(node.children.size() - 1).getGrammarObject().setAttributes(
+                                            rule.getGrammarObjectsList().get(i + 2).getAttributes());
+                                }
+                            } else {
+                                if (rule.getGrammarObjectsList().get(i + 1) instanceof NonTerminal) {
+                                    node.children.add(new Node(new NonTerminal(rule.getGrammarObjectsList().get(i + 1).getName())));
+                                    node.children.get(node.children.size() - 1).getGrammarObject().setAttributes(
+                                            rule.getGrammarObjectsList().get(i + 1).getAttributes());
+                                } else {
+                                    node.children.add(new Node(new Terminal(rule.getGrammarObjectsList().get(i + 1).getName())));
+                                    node.children.get(node.children.size() - 1).getGrammarObject().setAttributes(
+                                            rule.getGrammarObjectsList().get(i + 1).getAttributes());
+                                }
+                            }
                         }
                     }
 
@@ -189,12 +234,17 @@ public class ExpressionParser {
 
                     if (((Translator) grammarObject).getTranslatorType().equals(Translator.TranslatorType.COPY_TRANSLATOR)) {
                         args.add(node.grammarObject.getAttributes());
-                        args.add(rule.getGrammarObjectsList().get(i + 1).getAttributes());
+                        args.add(node.children.get(node.children.size() - 1).grammarObject.getAttributes());
                     }
 
                     if (((Translator) grammarObject).getTranslatorType().equals(Translator.TranslatorType.RETURN_TRANSLATOR)) {
-                        args.add(rule.getGrammarObjectsList().get(i - 1).getAttributes());
+                        args.add(node.children.get(node.children.size() - 1).grammarObject.getAttributes());
                         args.add(node.grammarObject.getAttributes());
+                    }
+
+                    if (((Translator) grammarObject).getTranslatorType().equals(Translator.TranslatorType.RIGHT_BRANCHING_ARGS_TRANSLATOR)) {
+                        args.add(node.children.get(node.children.size() - 2).grammarObject.getAttributes());
+                        args.add(node.children.get(node.children.size() - 1).grammarObject.getAttributes());
                     }
 
                     try {
@@ -206,6 +256,7 @@ public class ExpressionParser {
                     }
 
                     if (isArgs) {
+                        remind = node.children.get(node.children.size() - 1).grammarObject;
                         node.children.remove(node.children.size() - 1);
                     }
 
@@ -216,6 +267,10 @@ public class ExpressionParser {
             }
 
             break;
+        }
+
+        if (doesSmth) {
+            node.children.add(new Node(Terminal.EPSILON));
         }
 
         if (node.getChildren().isEmpty()) {

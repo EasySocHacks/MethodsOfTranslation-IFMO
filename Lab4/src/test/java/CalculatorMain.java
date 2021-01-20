@@ -11,7 +11,7 @@ public class CalculatorMain {
         ExpressionParser.Node node = null;
 
         try {
-            node = expressionParser.parse("(1 + 2)");
+            node = expressionParser.parse("1 + (1 + 0 / 123 / 1 * 2 + 3*2) + 5 + 1 / 1 * 2");
         } catch (TokenizerParseException | ExpressionParserException e) {
             e.printStackTrace();
         }

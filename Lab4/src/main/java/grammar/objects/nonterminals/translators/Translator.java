@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Translator extends NonTerminal {
-    private final Class<?> codeClass;
+    private Class<?> codeClass;
     private List<Argument> args;
     private TranslatorType translatorType;
 
@@ -78,12 +78,14 @@ public class Translator extends NonTerminal {
         ARGS,
         RETURN,
         COPY_TRANSLATOR,
-        RETURN_TRANSLATOR;
+        RETURN_TRANSLATOR,
+        RIGHT_BRANCHING_ARGS_TRANSLATOR;
     }
 
     private final static String classTemplateFormat =
             "import grammar.objects.nonterminals.NonTerminal;" + System.lineSeparator() +
             "import grammar.objects.attributes.Attribute;" + System.lineSeparator() +
+            "import utils.Table;" + System.lineSeparator() +
             "import java.util.Map;" + System.lineSeparator() +
             "import java.util.List;" + System.lineSeparator() +
             System.lineSeparator() +
@@ -112,27 +114,37 @@ public class Translator extends NonTerminal {
         try {
             Path sourcePath = Paths.get("src", "main", "resources", grammarName, "java", name + ".java");
 
-            Path sourceFilePath = sourcePath.getParent();
-            sourceFilePath.toFile().mkdirs();
+            if (!code.codeString.equals("")) {
+                Path sourceFilePath = sourcePath.getParent();
+                sourceFilePath.toFile().mkdirs();
 
-            Files.write(sourcePath, String.format(classTemplateFormat, name, code.codeString).getBytes());
+                Files.write(sourcePath, String.format(classTemplateFormat, name, code.codeString).getBytes());
 
-            JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-            compiler.run(null, null, null, sourcePath.toFile().getAbsolutePath());
+                JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+                compiler.run(null, null, null, sourcePath.toFile().getAbsolutePath());
 
-            Path classPath = sourcePath.getParent().resolve(name + ".class");
-            Path newClassPath = Paths.get("src", "main", "resources", grammarName, "class", name + ".class");
+                Path classPath = sourcePath.getParent().resolve(name + ".class");
+                Path newClassPath = Paths.get("src", "main", "resources", grammarName, "class", name + ".class");
 
-            Path classFilePath = newClassPath.getParent();
-            classFilePath.toFile().mkdirs();
+                Path classFilePath = newClassPath.getParent();
+                classFilePath.toFile().mkdirs();
 
-            Files.move(classPath, newClassPath, StandardCopyOption.REPLACE_EXISTING);
+                Files.move(classPath, newClassPath, StandardCopyOption.REPLACE_EXISTING);
 
-            URL classURL = newClassPath.getParent().toFile().toURI().toURL();
-            URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{classURL});
+                URL classURL = newClassPath.getParent().toFile().toURI().toURL();
+                URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{classURL});
 
-            codeClass = Class.forName(name, true, classLoader);
-            codeClass.newInstance();
+                codeClass = Class.forName(name, true, classLoader);
+                codeClass.newInstance();
+            } else {
+                Path newClassPath = Paths.get("src", "main", "resources", grammarName, "class", name + ".class");
+
+                URL classURL = newClassPath.getParent().toFile().toURI().toURL();
+                URLClassLoader classLoader = URLClassLoader.newInstance(new URL[]{classURL});
+
+                codeClass = Class.forName(name, true, classLoader);
+                codeClass.newInstance();
+            }
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | IOException e) {
             throw new CreateTranslatorWithCurrentCodeException(
                     String.format("Couldn't create translator's class with name '%s' and code %s%s -> %s%s",

@@ -1,5 +1,6 @@
 import grammar.objects.nonterminals.NonTerminal;
 import grammar.objects.attributes.Attribute;
+import utils.Table;
 import java.util.Map;
 import java.util.List;
 

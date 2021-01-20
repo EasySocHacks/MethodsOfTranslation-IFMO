@@ -130,9 +130,20 @@ translatorReturn [String grammarName] returns [List<Translator> translatorList]
                 maybeWhitespaces
                 '->'
                 maybeWhitespaces
-                codeValue=Code
-                maybeWhitespaces
-                { $translatorList.add(new Translator($grammarName, new Code($argsValue.text, $codeValue.text), TranslatorType.RETURN)); }
+                (
+                    (
+                        codeValue=Code
+                        maybeWhitespaces
+                        { $translatorList.add(new Translator($grammarName, new Code($argsValue.text, $codeValue.text), TranslatorType.RETURN)); }
+                    )
+                    |
+                    (
+                        '$'
+                        name=ClassName
+                        maybeWhitespaces
+                        { $translatorList.add(new Translator($grammarName, $name.text, new Code($argsValue.text, ""), TranslatorType.RETURN)); }
+                    )
+                )
             )+
             '}'
         )?
@@ -151,9 +162,20 @@ translatorArgs [String grammarName] returns [List<Translator> translatorList]
                 maybeWhitespaces
                 '->'
                 maybeWhitespaces
-                codeValue=Code
-                maybeWhitespaces
-                { $translatorList.add(new Translator($grammarName, new Code($argsValue.text, $codeValue.text), TranslatorType.ARGS)); }
+                (
+                    (
+                        codeValue=Code
+                        maybeWhitespaces
+                        { $translatorList.add(new Translator($grammarName, new Code($argsValue.text, $codeValue.text), TranslatorType.ARGS)); }
+                    )
+                    |
+                    (
+                        '$'
+                        name=ClassName
+                        maybeWhitespaces
+                        { $translatorList.add(new Translator($grammarName, $name.text, new Code($argsValue.text, ""), TranslatorType.ARGS)); }
+                    )
+                )
             )+
             ']'
         )?
@@ -216,7 +238,8 @@ ClassName
     ;
 
 Code
-    :   ((LowName | HighName | '='+ | '+'+ | '*'+ | '/'+ | ('0'..'9')+ | ';'+ | '.'+ | '('+ | ')'+ | '%'+ | '['+ | ']'+ | '"'+)
+    :   ((LowName | HighName | '='+ | '+'+ | '*'+ | '/'+ | ('0'..'9')+ | ';'+ | '.'+ | '('+ | ')'+ | '%'+ | '['+ | ']'+ | '"'+ | '\''+ | '!'+ |
+        '&'+ | '|'+ | '^'+)
         Whitespace*)+
         ';'
     ;

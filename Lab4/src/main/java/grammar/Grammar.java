@@ -6,12 +6,12 @@ import grammar.objects.GrammarObject;
 import grammar.objects.nonterminals.NonTerminal;
 import grammar.objects.nonterminals.translators.CopyTranslator;
 import grammar.objects.nonterminals.translators.ReturnTranslator;
+import grammar.objects.nonterminals.translators.RightBranchingArgsTranslator;
 import grammar.objects.nonterminals.translators.Translator;
 import grammar.objects.terminals.Terminal;
 import grammar.rules.Rule;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -83,11 +83,37 @@ public class Grammar {
 
                 if (ruleI.getFromNonTerminal().equals(ruleJ.getFromNonTerminal()) &&
                 ruleI.getGrammarObjectsList().get(0).equals(ruleJ.getGrammarObjectsList().get(0))) {
-                    foundRightBranching = true;
+                    int pos = 0;
+                    while (true) {
+                        if (pos >= ruleI.getGrammarObjectsList().size() || pos >= ruleJ.getGrammarObjectsList().size())
+                            break;
+
+                        if (!ruleI.getGrammarObjectsList().get(pos).equals(ruleJ.getGrammarObjectsList().get(pos)))
+                            break;
+
+                        int cnt = 0;
+
+                        if (!(ruleI.getGrammarObjectsList().get(pos) instanceof Translator))
+                            cnt++;
+
+                        if (!(ruleJ.getGrammarObjectsList().get(pos) instanceof Translator))
+                            cnt++;
+
+                        if (cnt == 2) {
+                            foundRightBranching = true;
+                            break;
+                        }
+
+                        pos++;
+                    }
+
+                    if (!foundRightBranching) {
+                        continue;
+                    }
 
                     List<GrammarObject> newGrammarObjectList = new ArrayList<>();
 
-                    for (int k = 1; k < ruleJ.getGrammarObjectsList().size(); k++) {
+                    for (int k = pos + 1; k < ruleJ.getGrammarObjectsList().size(); k++) {
                         GrammarObject grammarObject = ruleJ.getGrammarObjectsList().get(k);
 
                         if (!(grammarObject instanceof Translator)) {
@@ -133,7 +159,20 @@ public class Grammar {
 
                 List<GrammarObject> newGrammarObjectList = new ArrayList<>();
 
-                for (int k = 1; k < ruleI.getGrammarObjectsList().size(); k++) {
+                int pos = 0;
+                while (true) {
+                    if (pos >= ruleI.getGrammarObjectsList().size())
+                        break;
+
+                    if (ruleI.getGrammarObjectsList().get(pos) instanceof Translator) {
+                        pos++;
+                        continue;
+                    }
+
+                    break;
+                }
+
+                for (int k = pos + 1; k < ruleI.getGrammarObjectsList().size(); k++) {
                     GrammarObject grammarObject = ruleI.getGrammarObjectsList().get(k);
 
                     if (!(grammarObject instanceof Translator)) {
@@ -175,20 +214,30 @@ public class Grammar {
                 try {
                     Translator copyTranslator = new CopyTranslator(grammarName);
                     Translator returnTranslator = new ReturnTranslator(grammarName);
+                    Translator rightBranchingArgsTranslator = new RightBranchingArgsTranslator(grammarName);
 
+                    //TODO: Do it in build
                     nonTerminals.add(copyTranslator);
                     nonTerminals.add(returnTranslator);
+                    nonTerminals.add(rightBranchingArgsTranslator);
 
                     ruleList.add(new Rule(copyTranslator, Collections.singletonList(Terminal.EPSILON)));
                     ruleList.add(new Rule(returnTranslator, Collections.singletonList(Terminal.EPSILON)));
+                    ruleList.add(new Rule(rightBranchingArgsTranslator, Collections.singletonList(Terminal.EPSILON)));
+
+                    List<GrammarObject> endGrammarObjectList = new ArrayList<>();
+                    for (int k = 0; k <= pos; k++) {
+                        endGrammarObjectList.add(ruleI.getGrammarObjectsList().get(k));
+                    }
+
+                    endGrammarObjectList.add(rightBranchingArgsTranslator);
+                    endGrammarObjectList.add(copyTranslator);
+                    endGrammarObjectList.add(possibleNewNonTerminal);
+                    endGrammarObjectList.add(returnTranslator);
 
                     ruleList.add(new Rule(
                             ruleI.getFromNonTerminal(),
-                            Arrays.asList(
-                                    ruleI.getGrammarObjectsList().get(0),
-                                    copyTranslator,
-                                    possibleNewNonTerminal,
-                                    returnTranslator)
+                            endGrammarObjectList
                     ));
                 } catch (CreateTranslatorWithCurrentCodeException e) {
                     e.printStackTrace();
