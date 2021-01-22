@@ -139,7 +139,7 @@ public class ExpressionParser {
             if (!getRulePossibleTerminals(rule).contains(lexicalAnalyzer.getToken())) {
                 continue;
             }
-
+            
             for (int i = 0; i < rule.getGrammarObjectsList().size(); i++) {
                 GrammarObject grammarObject = rule.getGrammarObjectsList().get(i);
 
@@ -156,7 +156,7 @@ public class ExpressionParser {
                     }
 
                     Node newNode = new Node(lexicalAnalyzer.getToken());
-                    //TODO: when args, copy attrs and remind
+
                     newNode.grammarObject.setAttributes(lexicalAnalyzer.getToken().getAttributes());
 
                     if (remind != null) {

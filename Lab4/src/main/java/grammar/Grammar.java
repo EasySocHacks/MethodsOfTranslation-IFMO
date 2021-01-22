@@ -216,7 +216,6 @@ public class Grammar {
                     Translator returnTranslator = new ReturnTranslator(grammarName);
                     Translator rightBranchingArgsTranslator = new RightBranchingArgsTranslator(grammarName);
 
-                    //TODO: Do it in build
                     nonTerminals.add(copyTranslator);
                     nonTerminals.add(returnTranslator);
                     nonTerminals.add(rightBranchingArgsTranslator);

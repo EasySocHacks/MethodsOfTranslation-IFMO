@@ -16,6 +16,7 @@ public class CalculatorMain {
             e.printStackTrace();
         }
 
+        System.out.println(node);
         System.out.println("ANSWER: " + node.getGrammarObject().getAttributes().get("ans").getValue());
     }
 }
